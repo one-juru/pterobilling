@@ -35,7 +35,7 @@ PayPal, Cloudflare Zone, cPanel Zone, Minecraft JAR
 Please feel free to suggest more on [our Discord server](https://discord.gg/GQ5EWQz6MQ) (*Make sure to check the to-do list first*)
 
 ## Getting Started
-Please read our [documentation](https://docs.alaister.net).
+Please read our [documentation](https://docs.pterobilling.org/).
 
 ## Support
 **Make sure you have gone through the documentation before asking for help. Thank you!**
