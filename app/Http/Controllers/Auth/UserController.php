@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\Response;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
 {
@@ -70,7 +71,7 @@ class UserController extends Controller
 
     $user = User::create([
       'email' => $data['email'],
-      'password' => $data['password'],
+      'password' => Hash::make($data['password']),
       'language' => 'en'
     ]);
     $user->save();

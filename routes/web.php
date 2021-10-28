@@ -16,11 +16,15 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/client/{any?}', function () {
   return view('client');
-})->where('any', '^(?!api).*$');
+})
+  ->where('any', '^(?!api).*$')
+  ->middleware('auth');
 
 Route::get('/admin/{any?}', function () {
   return view('admin');
-})->where('any', '^(?!api).*$');
+})
+  ->where('any', '^(?!api).*$')
+  ->middleware('auth');
 
 Route::get('/{any?}', function () {
   $plugins_scripts = app(Extensions::class)->get_scripts();
@@ -31,4 +35,5 @@ Route::get('/{any?}', function () {
     'plugin_scripts' => $plugins_scripts,
     'loading_script' => $loading_script
   ]);
-})->where('any', '^(?!api).*$');
+})
+  ->where('any', '^(?!api).*$');
