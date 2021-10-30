@@ -21,10 +21,17 @@ Route::get('/client/{any?}', function () {
   ->middleware('auth');
 
 Route::get('/admin/{any?}', function () {
-  return view('admin');
+  $plugins_scripts = app(Extensions::class)->get_scripts();
+
+  $loading_script = app(Extensions::class)->generate_loader();
+
+  return view('admin', [
+    'plugin_scripts' => $plugins_scripts,
+    'loading_script' => $loading_script
+  ]);
 })
   ->where('any', '^(?!api).*$')
-  ->middleware('auth');
+  ->middleware('auth', 'admin');
 
 Route::get('/{any?}', function () {
   $plugins_scripts = app(Extensions::class)->get_scripts();

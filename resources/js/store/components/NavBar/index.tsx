@@ -183,18 +183,22 @@ class Navbar extends React.Component<NavbarProps, NavbarState> {
                       'is-active': this.isSub('account'),
                     })}
                   >
-                    <NavLink to="/my" className="navbar-item" activeClassName="is-active">
+                    <a href="/my" className="navbar-item">
                       {i18n.t('store:components.navbar.client')}
-                    </NavLink>
-                    <NavLink to="/my/credits" className="navbar-item" activeClassName="is-active">
+                    </a>
+                    <a href="/my/credits" className="navbar-item">
                       {i18n.t('store:components.navbar.client-credits')}
-                    </NavLink>
-                    <NavLink to="/my/account" className="navbar-item" activeClassName="is-active">
+                    </a>
+                    <a href="/my/account" className="navbar-item">
                       {i18n.t('store:components.navbar.client-account')}
-                    </NavLink>
-                    <NavLink to="/admin" className="navbar-item" activeClassName="is-active">
-                      {i18n.t('store:components.navbar.admin')}
-                    </NavLink>
+                    </a>
+
+                    {this.props.user.user?.is_admin ? (
+                      <a href="/admin" className="navbar-item">
+                        {i18n.t('store:components.navbar.admin')}
+                      </a>
+                    ) : null}
+
                     <hr className="navbar-divider"></hr>
                     <button className="navbar-item" onClick={this.logout}>
                       {i18n.t('store:components.navbar.logout')}

@@ -1,0 +1,18 @@
+{
+  "components": {
+    "navbar": {
+      "client": "Client area",
+      "client-credits": "Account credits",
+      "client-account": "Account settings",
+      "admin": "Admin area",
+      "logout": "Logout"
+    },
+    "footer": {
+      "copyright": "Copyright © {{year}} ",
+      "powered": "Powered by <1>Pterobilling</1>",
+      "status": "Status",
+      "terms": "Terms of Service",
+      "privacy": "Privacy Policy"
+    }
+  }
+}

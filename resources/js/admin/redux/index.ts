@@ -1,8 +1,8 @@
-import { applyMiddleware, combineReducers, createStore, compose } from 'redux'
-import { globalReducer } from './modules/global'
-import { userReducer } from './modules/user'
-import thunk from 'redux-thunk'
+import { applyMiddleware, combineReducers, compose, createStore } from 'redux'
 import { createLogger } from 'redux-logger'
+import thunk from 'redux-thunk'
+import { globalReducer } from '@/admin/redux/modules/global'
+import { userReducer } from '@/admin/redux/modules/user'
 
 // Creating the Redux logger
 const logger = createLogger()

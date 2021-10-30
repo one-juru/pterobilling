@@ -1,0 +1,14 @@
+@import './base.scss';
+@import './components/sidebar.scss';
+
+#app > .page-content {
+  @apply flex-1 flex flex-row;
+}
+
+#app > .container {
+  @apply flex-1;
+
+  @screen md {
+    @apply px-2;
+  }
+}

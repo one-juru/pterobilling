@@ -1,0 +1,38 @@
+.sidebar-container {
+  @apply z-40 fixed top-0 left-0;
+
+  .sidebar-overlay {
+    @apply transition-opacity duration-150 bg-opacity-0 bg-black h-screen w-screen;
+
+    @apply hidden;
+  }
+
+  .sidebar {
+    @apply bg-bgray-800 h-full z-50 px-4 py-2 shadow-lg;
+    @apply fixed w-64 left-0 top-0;
+
+    @apply transition-transform duration-150 transform-gpu -translate-x-64;
+  }
+
+  &.active {
+    .sidebar {
+      @apply translate-x-0;
+    }
+
+    .sidebar-overlay {
+      @apply bg-opacity-60 block;
+    }
+  }
+
+  @screen md {
+    @apply z-auto relative h-full w-56;
+
+    .sidebar-overlay {
+      @apply hidden;
+    }
+
+    .sidebar {
+      @apply translate-x-0 relative w-full bg-bgray-800 border-t border-b border-bgray-600 shadow-inner;
+    }
+  }
+}

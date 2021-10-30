@@ -1,26 +1,31 @@
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-    <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
 
-        <title>PteroBilling</title>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
 
-        <!-- Fonts -->
-        <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+    <title>PteroBilling</title>
 
-        <!-- Styles -->
-        <link rel="stylesheet" href="{{ mix('css/themes/default/store.css') }}" />
-    </head>
-    <body data-compagny="Pterobilling" r-load>
-        <div id="app"></div>
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
 
-        @foreach($plugin_scripts as $script)
-          <script type="application/javascript"  src="{{ $script }}"></script>
-        @endforeach
+    <!-- Styles -->
+    <link rel="stylesheet" href="{{ mix('css/themes/default/store.css') }}" />
+</head>
 
-        <script type="application/javascript">{{ $loading_script }}</script>
+<body data-compagny="Pterobilling" r-load>
+    <div id="app"></div>
 
-        <script src="{{ mix('js/store.js') }}" defer></script>
-    </body>
+    @foreach ($plugin_scripts as $script)
+        <script type="application/javascript" src="{{ $script }}"></script>
+    @endforeach
+
+    <script type="application/javascript">
+        {{ $loading_script }}
+    </script>
+
+    <script src="{{ mix('js/store.js') }}" defer></script>
+</body>
+
 </html>

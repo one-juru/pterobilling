@@ -1,7 +1,3 @@
-/**
- * User module store will allow us to share user data through the whole application
- */
-
 import { Action, ActionWithPayload, typedAction } from '@/common/redux/commonTypes'
 import { UserInfo } from '@/typings'
 

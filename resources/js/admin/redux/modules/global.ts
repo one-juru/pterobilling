@@ -7,10 +7,6 @@ export interface GlobalState {
   appName: string
   appIcon: string
   appVersion: string
-  plans: {
-    id: number
-    name: string
-  }[]
   currentRoute?: string
 }
 
@@ -18,7 +14,6 @@ const initialState: GlobalState = {
   appName: 'PteroBilling',
   appIcon: '/images/icon.png',
   appVersion: '',
-  plans: [],
 }
 
 export function setGlobal(
