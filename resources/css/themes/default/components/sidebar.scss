@@ -8,7 +8,7 @@
   }
 
   .sidebar {
-    @apply bg-bgray-800 h-full z-50 px-4 py-2 shadow-lg;
+    @apply bg-bgray-800 h-full z-50 py-2 shadow-lg;
     @apply fixed w-64 left-0 top-0;
 
     @apply transition-transform duration-150 transform-gpu -translate-x-64;
@@ -33,6 +33,30 @@
 
     .sidebar {
       @apply translate-x-0 relative w-full bg-bgray-800 border-t border-b border-bgray-600 shadow-inner;
+    }
+  }
+
+  .sidebar-title {
+    @apply uppercase text-sm px-4;
+  }
+
+  .sidebar-item {
+    @apply w-full py-2 text-white;
+
+    &:hover {
+      @apply bg-white bg-opacity-10;
+    }
+
+    &.active {
+      background-color: #3f6791;
+    }
+  }
+
+  .sidebar-category .category-content {
+    @apply flex flex-col;
+
+    .sidebar-item {
+      @apply pl-6;
     }
   }
 }

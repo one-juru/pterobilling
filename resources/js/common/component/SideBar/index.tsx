@@ -3,6 +3,7 @@ import classname from 'classnames'
 
 interface SideBarState {
   isOpen: boolean
+  children?: React.ReactNode
 }
 
 class SideBar extends Component<unknown, SideBarState> {
@@ -14,9 +15,7 @@ class SideBar extends Component<unknown, SideBarState> {
     return (
       <div className={classname('sidebar-container', { active: this.state.isOpen })}>
         <div className="sidebar-overlay" onClick={() => this.toggleSidebar()}></div>
-        <div className="sidebar">
-          <h1 className="test">salut</h1>
-        </div>
+        <div className="sidebar">{this.props.children}</div>
       </div>
     )
   }
@@ -29,4 +28,5 @@ class SideBar extends Component<unknown, SideBarState> {
 }
 
 export default SideBar
-export * from './Items'
+export { default as SideBarItem } from './Item'
+export { default as SidebarCategory } from './Category'
