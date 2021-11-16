@@ -792,16 +792,16 @@
         },
         {
             "name": "guzzlehttp/promises",
-            "version": "1.5.0",
+            "version": "1.5.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/guzzle/promises.git",
-                "reference": "136a635e2b4a49b9d79e9c8fee267ffb257fdba0"
+                "reference": "fe752aedc9fd8fcca3fe7ad05d419d32998a06da"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/guzzle/promises/zipball/136a635e2b4a49b9d79e9c8fee267ffb257fdba0",
-                "reference": "136a635e2b4a49b9d79e9c8fee267ffb257fdba0",
+                "url": "https://api.github.com/repos/guzzle/promises/zipball/fe752aedc9fd8fcca3fe7ad05d419d32998a06da",
+                "reference": "fe752aedc9fd8fcca3fe7ad05d419d32998a06da",
                 "shasum": ""
             },
             "require": {
@@ -856,7 +856,7 @@
             ],
             "support": {
                 "issues": "https://github.com/guzzle/promises/issues",
-                "source": "https://github.com/guzzle/promises/tree/1.5.0"
+                "source": "https://github.com/guzzle/promises/tree/1.5.1"
             },
             "funding": [
                 {
@@ -872,7 +872,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2021-10-07T13:05:22+00:00"
+            "time": "2021-10-22T20:56:57+00:00"
         },
         {
             "name": "guzzlehttp/psr7",
@@ -2703,16 +2703,16 @@
         },
         {
             "name": "srmklive/paypal",
-            "version": "3.0.3",
+            "version": "3.0.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/srmklive/laravel-paypal.git",
-                "reference": "0aefc864b351770f9e82b2fc88d8aa6c87de3c87"
+                "reference": "e7a3bc6f6360ea2d75b138aad3bfe1c3479ed6f9"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/srmklive/laravel-paypal/zipball/0aefc864b351770f9e82b2fc88d8aa6c87de3c87",
-                "reference": "0aefc864b351770f9e82b2fc88d8aa6c87de3c87",
+                "url": "https://api.github.com/repos/srmklive/laravel-paypal/zipball/e7a3bc6f6360ea2d75b138aad3bfe1c3479ed6f9",
+                "reference": "e7a3bc6f6360ea2d75b138aad3bfe1c3479ed6f9",
                 "shasum": ""
             },
             "require": {
@@ -2761,9 +2761,9 @@
             ],
             "support": {
                 "issues": "https://github.com/srmklive/laravel-paypal/issues",
-                "source": "https://github.com/srmklive/laravel-paypal/tree/3.0.3"
+                "source": "https://github.com/srmklive/laravel-paypal/tree/3.0.4"
             },
-            "time": "2021-03-02T09:52:07+00:00"
+            "time": "2021-11-10T14:40:28+00:00"
         },
         {
             "name": "swiftmailer/swiftmailer",
