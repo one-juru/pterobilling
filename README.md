@@ -11,7 +11,6 @@
     <img src="https://raw.githubusercontent.com/pterobilling/pterobilling/master/.github/preview_1_dark.png" alt="Preview" width="40%">&emsp;
     <img src="https://raw.githubusercontent.com/pterobilling/pterobilling/master/.github/preview_1_light.png" alt="Preview" width="40%">
     <br>
-    <h3>Announcement: An early access will be released soon!</h3>
 </div>
 
 [![PHP Composer](https://github.com/pterobilling/pterobilling/actions/workflows/php.yml/badge.svg)](https://github.com/pterobilling/pterobilling/actions/workflows/php.yml)
@@ -33,6 +32,9 @@
 PayPal, Cloudflare Zone, cPanel Zone, Minecraft JAR
 
 Please feel free to suggest more on [our Discord server](https://discord.gg/GQ5EWQz6MQ) (*Make sure to check the to-do list first*)
+
+## Demo
+If you want to take a quick look at Pterobilling, you can do so at out public hosted [demo](https://demo.pterobilling.org). You can login with `admin@example.com | password`
 
 ## Getting Started
 Please read our [documentation](https://docs.pterobilling.org/).
