@@ -18,7 +18,7 @@
                             <input type="text" name="name" class="form-control" id="nameInput" placeholder="Discount Name" required>
                         </div>
                         <div class="form-group col-lg-4">
-                            <label for="percentOffInput">Percent Off</label>
+                            <label for="percentOffInput">Percent Off (One-time)</label>
                             <input type="text" name="percent_off" min="1" max="100" step="1" class="form-control" id="percentOffInput" placeholder="Percent Off" required>
                         </div>
                         <div class="form-group col-lg-4">

@@ -1,7 +1,9 @@
 @extends('layouts.admin')
 
 @inject('invoice_model', 'App\Models\Invoice')
+@inject('client_model', 'App\Models\Client')
 @inject('server_model', 'App\Models\Server')
+@inject('tax_model', 'App\Models\Tax')
 
 @section('title', 'Invoices')
 
@@ -35,18 +37,17 @@
                                     @if ($invoice->server_id)
                                         Server #{{ $invoice->server_id }}
                                     @elseif ($invoice->credit_amount)
-                                        {!! session('currency')->symbol !!}{{ number_format($invoice->credit_amount * session('currency')->rate) }} {{ session('currency')->name }} Credit
+                                        {!! session('currency')->symbol !!}{{ $invoice->credit_amount * session('currency')->rate }} {{ session('currency')->name }} Credit
                                     @endif
                                 </td>
                                 @php
                                     $tax = $tax_model->find($invoice->tax_id);
                                 @endphp
                                 <td>
-                                    {!! session('currency')->symbol !!}
                                     @if ($invoice->server_id)
-                                        {{ number_format((($server_model->getTotalCost() + $invoice->late_fee) * ($tax->percent / 100) + $tax->amount) * session('currency')->rate) }} 
+                                        {!! session('currency')->symbol !!}{{ $server_model->getTotalCost($server_model->find($invoice->server_id)) + $invoice->late_fee }} 
                                     @elseif ($invoice->credit_amount)
-                                        {{ number_format(($invoice->credit_amount * ($tax->percent / 100) + $tax->amount) * session('currency')->rate) }} 
+                                        {!! session('currency')->symbol !!}{{ $tax_model::getAfterTax($invoice->credit_amount, $invoice->tax_id) * session('currency')->rate }} 
                                     @endif
                                     {{ session('currency')->name }}
                                 </td>
@@ -96,18 +97,17 @@
                                     @if ($invoice->server_id)
                                         Server #{{ $invoice->server_id }}
                                     @elseif ($invoice->credit_amount)
-                                        {!! session('currency')->symbol !!}{{ number_format($invoice->credit_amount * session('currency')->rate) }} {{ session('currency')->name }} Credit
+                                        {!! session('currency')->symbol !!}{{ $invoice->credit_amount * session('currency')->rate }} {{ session('currency')->name }} Credit
                                     @endif
                                 </td>
                                 @php
                                     $tax = $tax_model->find($invoice->tax_id);
                                 @endphp
                                 <td>
-                                    {!! session('currency')->symbol !!}
                                     @if ($invoice->server_id)
-                                        {{ number_format((($server_model->getTotalCost() + $invoice->late_fee) * ($tax->percent / 100) + $tax->amount) * session('currency')->rate) }} 
+                                        {!! session('currency')->symbol !!}{{ $tax_model::getAfterTax($server_model->getTotalCost() + $invoice->late_fee, $invoice->tax_id) * session('currency')->rate }} 
                                     @elseif ($invoice->credit_amount)
-                                        {{ number_format(($invoice->credit_amount * ($tax->percent / 100) + $tax->amount) * session('currency')->rate) }} 
+                                        {!! session('currency')->symbol !!}{{ $tax_model::getAfterTax($invoice->credit_amount, $invoice->tax_id) * session('currency')->rate }} 
                                     @endif
                                     {{ session('currency')->name }}
                                 </td>

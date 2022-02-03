@@ -54,7 +54,7 @@ class PayInvoiceNotif extends Notification implements ShouldQueue
             'body_action' => 'You may click the button below to view the invoice details, due amount and due date.',
             'button_text' => 'View Invoice',
             'button_url' => url()->route('client.invoice.show', ['id' => $this->invoice->id]),
-            'notice' => 'You received this email because you have ordered our products or services.',
+            'notice' => 'You received this email because you have ordered a product or service from us.',
         ]);
     }
 

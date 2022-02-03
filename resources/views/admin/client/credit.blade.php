@@ -70,7 +70,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach ($credit_model->where('client_id', $client->id)->get() as $credit)
+                            @foreach ($credit_model->where('client_id', $client->id)->latest()->get() as $credit)
                                 <tr>
                                     <td>{{ $credit->id }}</td>
                                     <td>{{ $credit->details }}</td>

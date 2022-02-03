@@ -22,7 +22,7 @@
                             <textarea name="description" class="form-control" id="descriptionInput">{{ $category->description }}</textarea>
                         </div>
                         <div class="form-group col-lg-4">
-                            <label for="orderInput">Order (The smaller, the higher display priority)</label>
+                            <label for="orderInput">Order (smaller = higher display priority)</label>
                             <input type="text" name="order" value="{{ $category->order }}" value="1000" class="form-control" id="orderInput" placeholder="Order" required>
                         </div>
                         <div class="form-group col-lg-4">

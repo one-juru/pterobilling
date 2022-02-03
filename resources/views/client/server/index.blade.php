@@ -35,13 +35,7 @@
                                 <tr>
                                     <td><a href="{{ route('client.server.show', ['id' => $server->id]) }}">{{ $server->id }}</a></td>
                                     <td>{{ $plan_model->find($server->plan_id)->name }}</td>
-                                    <td>
-                                        @if(session('server_' . $server->id))
-                                            {{ session('server_' . $server->id) }}
-                                        @else
-                                            Server #{{ $server->id }}
-                                        @endif
-                                    </td>
+                                    <td>{{ $server->server_name }}</td>
                                     <td>
                                         @if ($server->subdomain_name)
                                             {{ $server->subdomain_name }}.{{ $server->subdomain }}
@@ -83,13 +77,7 @@
                                 <tr>
                                     <td>{{ $server->id }}</td>
                                     <td>{{ $plan_model->find($server->plan_id)->name }}</td>
-                                    <td>
-                                        @if(session('server_' . $server->id))
-                                            {{ session('server_' . $server->id) }}
-                                        @else
-                                            Server #{{ $server->id }}
-                                        @endif
-                                    </td>
+                                    <td>{{ $server->server_name }}</td>
                                     <td>{{ $server->created_at }}</td>
                                 </tr>
                             @endforeach
@@ -119,13 +107,7 @@
                                 <tr>
                                     <td>{{ $server->id }}</td>
                                     <td>{{ $plan_model->find($server->plan_id)->name }}</td>
-                                    <td>
-                                        @if(session('server_' . $server->id))
-                                            {{ session('server_' . $server->id) }}
-                                        @else
-                                            Server #{{ $server->id }}
-                                        @endif
-                                    </td>
+                                    <td>{{ $server->server_name }}</td>
                                     <td>{{ $server->updated_at }}</td>
                                 </tr>
                             @endforeach
@@ -157,13 +139,7 @@
                                 <tr>
                                     <td>{{ $server->id }}</td>
                                     <td>{{ $plan_model->find($server->plan_id)->name }}</td>
-                                    <td>
-                                        @if(session('server_' . $server->id))
-                                            {{ session('server_' . $server->id) }}
-                                        @else
-                                            Server #{{ $server->id }}
-                                        @endif
-                                    </td>
+                                    <td>{{ $server->server_name }}</td>
                                     <td>{{ $server->updated_at }}</td>
                                 </tr>
                             @endforeach

@@ -22,6 +22,13 @@
                             <input type="text" name="percent_off" min="1" max="100" step="1" class="form-control" id="percentOffInput" placeholder="Percent Off" required>
                         </div>
                         <div class="form-group col-lg-4">
+                            <label for="onetimeInput">One-time (first cycle only)?</label>
+                            <select class="form-control" name="one_time">
+                                <option value="1">Yes</option>
+                                <option value="0">No</option>
+                            </select>
+                        </div>
+                        <div class="form-group col-lg-4">
                             <label for="globalLimitInput">Global Limit (max. uses) (Optional)</label>
                             <input type="text" name="global_limit" class="form-control" id="globalLimitInput" placeholder="0 = Cannot be used">
                         </div>

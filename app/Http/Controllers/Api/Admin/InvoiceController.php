@@ -3,10 +3,8 @@
 namespace App\Http\Controllers\Api\Admin;
 
 use App\Http\Controllers\Api\ApiController;
+use App\Jobs\InvoicePaid;
 use App\Models\Invoice;
-use App\Models\PlanCycle;
-use App\Models\Server;
-use Carbon\Carbon;
 
 class InvoiceController extends ApiController
 {    
@@ -16,7 +14,9 @@ class InvoiceController extends ApiController
         $invoice->paid = true;
         $invoice->save();
 
-        if ($server = Server::find($invoice->server_id)) {
+        InvoicePaid::dispatch($invoice)->onQueue('high');
+
+        /*if ($server = Server::find($invoice->server_id)) {
             $plan_cycle = PlanCycle::find($server->plan_cycle);
             $minutes = null;
 
@@ -42,7 +42,7 @@ class InvoiceController extends ApiController
                 $server->due_date = Carbon::parse($server->due_date)->addMinutes($minutes);
                 $server->save();
             }
-        }
+        }*/
 
         return $this->respondJson(['success' => 'You have marked the invoice as paid!']);
     }

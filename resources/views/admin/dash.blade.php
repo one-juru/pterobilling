@@ -11,7 +11,7 @@
         <div class="col-lg-3 col-md-6">
             <div class="small-box bg-success">
                 <div class="inner">
-                    <h3>{!! session('currency')->symbol !!}{{ number_format(array_sum($incomes) * session('currency')->rate, 2) }} {{ session('currency')->name }}</h3>
+                    <h3>{!! session('currency')->symbol !!}{{ array_sum($incomes) * session('currency')->rate }} {{ session('currency')->name }}</h3>
                     <p>Income (Last 30 Days)</p>
                 </div>
                 <div class="icon">
@@ -125,7 +125,7 @@
         $.ajax({'url': 'https://api.github.com/repos/pterobilling/pterobilling/releases/latest', 'success': function (data) {
             $('#latest-version').html((data.tag_name) ? `is <b>${data.tag_name}</b>` : `hasn't been released yet`)
         }, 'error': function () {
-            $('#latest-version').html(`hasn't been released yet`)
+            $('#latest-version').html(`is unknown`)
         }})
         
         $(function() {

@@ -50,11 +50,11 @@ class InvoicePaidNotif extends Notification implements ShouldQueue
     {
         return (new MailMessage)->subject('Your invoice (#'.$this->invoice->id.') has been paid successfully')->view('emails.notif', [
             'subject' => 'Invoice Paid',
-            'body_message' => 'Thank you for ordering our products/services. You have successfully paid for the invoice (#'.$this->invoice->id.').',
+            'body_message' => 'Thank you for ordering a product or service from us. You have successfully paid for the invoice (#'.$this->invoice->id.').',
             'body_action' => 'You may click the button below to view the invoice details.',
             'button_text' => 'View Invoice',
             'button_url' => url()->route('client.invoice.show', ['id' => $this->invoice->id]),
-            'notice' => 'You received this email because you have ordered our products or services.',
+            'notice' => 'You received this email because you have completed your payment for your order.',
         ]);
     }
 

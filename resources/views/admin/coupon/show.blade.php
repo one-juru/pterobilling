@@ -25,6 +25,13 @@
                             <input type="text" name="percent_off" value="{{ $coupon->percent_off }}" min="1" max="100" step="1" class="form-control" id="percentOffInput" placeholder="Percent Off" required>
                         </div>
                         <div class="form-group col-lg-4">
+                            <label for="onetimeInput">One-time (first cycle only)?</label>
+                            <select class="form-control" name="one_time">
+                                <option value="1" @if ($coupon->one_time) selected @endif>Yes</option>
+                                <option value="0" @unless ($coupon->one_time) selected @endunless>No</option>
+                            </select>
+                        </div>
+                        <div class="form-group col-lg-4">
                             <label for="globalLimitInput">Global Limit (max. uses) (Optional)</label>
                             <input type="text" name="global_limit" value="{{ $coupon->global_limit }}" class="form-control" id="globalLimitInput" placeholder="0 = Cannot be used">
                         </div>
@@ -55,7 +62,7 @@
         <div class="col-lg-12">
             <div class="card">
                 <div class="card-header">
-                    <h3 class="card-title">Used Coupons</h3>
+                    <h3 class="card-title">Uses</h3>
                 </div>
                 <div class="card-body table-responsive">
                     <table id="used-coupons-table" class="table table-hover text-nowrap">

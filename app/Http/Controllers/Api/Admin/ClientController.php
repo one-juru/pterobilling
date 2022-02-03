@@ -7,6 +7,7 @@ use App\Jobs\DeletePanelUser;
 use App\Jobs\EditPanelUserEmail;
 use App\Jobs\SuspendServer;
 use App\Models\Client;
+use App\Models\Credit;
 use App\Models\Currency;
 use App\Models\Server;
 use App\Models\Tax;
@@ -141,6 +142,14 @@ class ClientController extends ApiController
             return $this->respondJson(['errors' => $validator->errors()->all()]);
         
         $client = Client::find($id);
+        
+        Credit::create([
+            'client_id' => $request->user()->id,
+            'details' => 'Edited by an administrator',
+            'change' => $request->input('credit') - $client->credit,
+            'balance' => $request->input('credit'),
+        ]);
+
         $client->credit = $request->input('credit');
         $client->save();
         

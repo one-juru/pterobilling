@@ -16,8 +16,8 @@ class CreateTaxesTable extends Migration
         Schema::create('taxes', function (Blueprint $table) {
             $table->id();
             $table->string('country')->unique();
-            $table->decimal('percent')->unsigned()->nullable();
-            $table->decimal('amount')->unsigned()->nullable();
+            $table->decimal('percent', 5, 3)->unsigned()->default(0);
+            $table->decimal('amount', 16, 6)->unsigned()->default(0);
             $table->timestamps();
         });
     }

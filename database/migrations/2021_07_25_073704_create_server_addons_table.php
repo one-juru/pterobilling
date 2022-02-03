@@ -18,7 +18,7 @@ class CreateServerAddonsTable extends Migration
             $table->integer('addon_id')->unsigned();
             $table->integer('server_id')->unsigned();
             $table->integer('client_id')->unsigned();
-            $table->integer('quantity')->unsigned();
+            $table->string('value');
             $table->timestamps();
         });
     }

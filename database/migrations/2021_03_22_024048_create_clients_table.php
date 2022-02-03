@@ -20,11 +20,11 @@ class CreateClientsTable extends Migration
             $table->integer('user_id')->unsigned()->nullable()->unique();
             $table->string('password')->unique();
             $table->integer('referer_id')->unsigned()->nullable();
-            $table->decimal('credit')->unsigned()->default(0.00);
+            $table->decimal('credit', 16, 6)->unsigned()->default(0);
             $table->integer('clicks')->unsigned()->default(0);
             $table->integer('sign_ups')->unsigned()->default(0);
             $table->integer('purchases')->unsigned()->default(0);
-            $table->decimal('commissions')->unsigned()->default(0.00);
+            $table->decimal('commissions', 16, 6)->unsigned()->default(0);
             $table->string('currency');
             $table->string('country');
             $table->string('timezone')->default('UTC');

@@ -17,16 +17,18 @@ class IssueCreditInvoice implements ShouldQueue
 
     protected $client_id;
     protected $credit_amount;
+    protected $payment_method;
 
     /**
      * Create a new job instance.
      *
      * @return void
      */
-    public function __construct($client_id, $credit_amount)
+    public function __construct($client_id, $credit_amount, $payment_method)
     {
         $this->client_id = $client_id;
         $this->credit_amount = $credit_amount;
+        $this->payment_method = $payment_method;
     }
 
     /**
@@ -40,8 +42,10 @@ class IssueCreditInvoice implements ShouldQueue
         $invoice = Invoice::create([
             'client_id' => $client->id,
             'credit_amount' => $this->credit_amount,
+            'total' => $this->credit_amount,
+            'payment_method' => $this->payment_method,
         ]);
 
-        $client->notify(new PayInvoiceNotif($invoice->id));
+        $client->notify(new PayInvoiceNotif($invoice));
     }
 }

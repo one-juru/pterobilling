@@ -18,7 +18,7 @@ class CreateAddonsTable extends Migration
             $table->string('name');
             $table->text('description')->nullable();
             $table->string('resource');
-            $table->integer('amount')->unsigned();
+            $table->string('amount');
             $table->string('categories')->nullable();
             $table->integer('global_limit')->unsigned()->nullable();
             $table->integer('per_client_limit')->unsigned()->nullable();

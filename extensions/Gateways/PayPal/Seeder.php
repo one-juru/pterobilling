@@ -16,15 +16,6 @@ class Seeder extends DatabaseSeeder
     {
         $i = 0;
 
-        if (is_null(Extension::where(['extension' => 'PayPal', 'key' => 'enabled'])->first())) {
-            Extension::create([
-                'extension' => 'PayPal',
-                'key' => 'enabled',
-                'value' => 'false',
-            ]);
-            ++$i;
-        }
-
         if (is_null(Extension::where(['extension' => 'PayPal', 'key' => 'mode'])->first())) {
             Extension::create([
                 'extension' => 'PayPal',
@@ -34,91 +25,46 @@ class Seeder extends DatabaseSeeder
             ++$i;
         }
 
-        if (is_null(Extension::where(['extension' => 'PayPal', 'key' => 'sandbox_api_username'])->first())) {
+        if (is_null(Extension::where(['extension' => 'PayPal', 'key' => 'username'])->first())) {
             Extension::create([
                 'extension' => 'PayPal',
-                'key' => 'sandbox_api_username',
+                'key' => 'username',
                 'value' => null,
             ]);
             ++$i;
         }
 
-        if (is_null(Extension::where(['extension' => 'PayPal', 'key' => 'sandbox_api_password'])->first())) {
+        if (is_null(Extension::where(['extension' => 'PayPal', 'key' => 'password'])->first())) {
             Extension::create([
                 'extension' => 'PayPal',
-                'key' => 'sandbox_api_password',
+                'key' => 'password',
                 'value' => null,
             ]);
             ++$i;
         }
 
-        if (is_null(Extension::where(['extension' => 'PayPal', 'key' => 'sandbox_api_secret'])->first())) {
+        if (is_null(Extension::where(['extension' => 'PayPal', 'key' => 'secret'])->first())) {
             Extension::create([
                 'extension' => 'PayPal',
-                'key' => 'sandbox_api_secret',
+                'key' => 'secret',
                 'value' => null,
             ]);
             ++$i;
         }
 
-        if (is_null(Extension::where(['extension' => 'PayPal', 'key' => 'sandbox_api_certificate'])->first())) {
+        if (is_null(Extension::where(['extension' => 'PayPal', 'key' => 'certificate'])->first())) {
             Extension::create([
                 'extension' => 'PayPal',
-                'key' => 'sandbox_api_certificate',
+                'key' => 'certificate',
                 'value' => null,
             ]);
             ++$i;
         }
 
-        if (is_null(Extension::where(['extension' => 'PayPal', 'key' => 'sandbox_app_id'])->first())) {
+        if (is_null(Extension::where(['extension' => 'PayPal', 'key' => 'app_id'])->first())) {
             Extension::create([
                 'extension' => 'PayPal',
-                'key' => 'sandbox_app_id',
-                'value' => null,
-            ]);
-            ++$i;
-        }
-
-        if (is_null(Extension::where(['extension' => 'PayPal', 'key' => 'live_api_username'])->first())) {
-            Extension::create([
-                'extension' => 'PayPal',
-                'key' => 'live_api_username',
-                'value' => null,
-            ]);
-            ++$i;
-        }
-
-        if (is_null(Extension::where(['extension' => 'PayPal', 'key' => 'live_api_password'])->first())) {
-            Extension::create([
-                'extension' => 'PayPal',
-                'key' => 'live_api_password',
-                'value' => null,
-            ]);
-            ++$i;
-        }
-
-        if (is_null(Extension::where(['extension' => 'PayPal', 'key' => 'live_api_secret'])->first())) {
-            Extension::create([
-                'extension' => 'PayPal',
-                'key' => 'live_api_secret',
-                'value' => null,
-            ]);
-            ++$i;
-        }
-
-        if (is_null(Extension::where(['extension' => 'PayPal', 'key' => 'live_api_certificate'])->first())) {
-            Extension::create([
-                'extension' => 'PayPal',
-                'key' => 'live_api_certificate',
-                'value' => null,
-            ]);
-            ++$i;
-        }
-
-        if (is_null(Extension::where(['extension' => 'PayPal', 'key' => 'live_app_id'])->first())) {
-            Extension::create([
-                'extension' => 'PayPal',
-                'key' => 'live_app_id',
+                'key' => 'app_id',
                 'value' => null,
             ]);
             ++$i;

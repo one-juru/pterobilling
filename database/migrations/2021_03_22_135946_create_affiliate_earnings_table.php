@@ -18,8 +18,8 @@ class CreateAffiliateEarningsTable extends Migration
             $table->integer('client_id')->unsigned();
             $table->integer('buyer_id')->unsigned();
             $table->string('product');
-            $table->decimal('commission')->unsigned();
-            $table->integer('conversion')->unsigned();
+            $table->decimal('commission', 16, 6)->unsigned();
+            $table->decimal('conversion', 6, 3)->unsigned();
             $table->tinyInteger('status')->unsigned()->default(1);
             $table->timestamps();
         });

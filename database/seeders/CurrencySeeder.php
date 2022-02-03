@@ -20,6 +20,8 @@ class CurrencySeeder extends Seeder
             Currency::create([
                 'name' => 'USD',
                 'symbol' => '&#36;',
+                'rate' => 1,
+                'precision' => 2,
                 'default' => true,
             ]);
             ++$i;

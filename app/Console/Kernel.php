@@ -23,11 +23,11 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        $schedule->job(new ServerExpiry, 'long')->everyTenMinutes();
+        #$schedule->job(new ServerExpiry, 'long')->everyTenMinutes();
         $schedule->command('queue:work --sansdaemon --queue=high,default --tries=3')->everyMinute()->runInBackground();
         $schedule->command('queue:work --sansdaemon --queue=long --tries=3')->everyFiveMinutes()->runInBackground();
-        $schedule->command('queue:retry all')->everyThreeHours()->runInBackground();
-        $schedule->command('telescope:prune')->weekly();
+        $schedule->command('queue:retry all')->hourly()->runInBackground();
+        $schedule->command('telescope:prune')->weekly()->runInBackground();
     }
 
     /**

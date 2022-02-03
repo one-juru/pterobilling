@@ -25,7 +25,7 @@
                             <textarea name="description" class="form-control" id="descriptionInput" placeholder="Around 10 words recommended">{{ $addon->description }}</textarea>
                         </div>
                         <div class="form-group col-lg-4">
-                            <label for="orderInput">Order (The smaller, the higher display priority)</label>
+                            <label for="orderInput">Order (smaller = higher display priority)</label>
                             <input type="text" name="order" value="{{ $addon->order }}" value="1000" class="form-control" id="orderInput" placeholder="Order" required>
                         </div>
                         <div class="form-group col-lg-4">
@@ -37,32 +37,32 @@
                                 </div>
                             @endforeach
                         </div>
-                        <div class="form-group col-lg-4">
+                        <div class="form-group col-lg-3">
                             <label>Resource</label>
                             <select class="form-control" name="resource">
-                                <option value="ram" @if ($addon->resource === 'ram') selected @endif>RAM</option>
-                                <option value="cpu" @if ($addon->resource === 'cpu') selected @endif>CPU</option>
-                                <option value="disk" @if ($addon->resource === 'disk') selected @endif>Disk</option>
+                                <option value="ram" @if ($addon->resource === 'ram') selected @endif>RAM (MB)</option>
+                                <option value="cpu" @if ($addon->resource === 'cpu') selected @endif>CPU (%)</option>
+                                <option value="disk" @if ($addon->resource === 'disk') selected @endif>Disk (MB)</option>
                                 <option value="database" @if ($addon->resource === 'database') selected @endif>Database</option>
                                 <option value="backup" @if ($addon->resource === 'backup') selected @endif>Backup</option>
                                 <option value="extra_port" @if ($addon->resource === 'extra_port') selected @endif>Extra Port</option>
-                                <option value="dedicated_ip" @if ($addon->resource === 'dedicated_ip') selected @endif>Dedicated IP</option>
+                                <option value="dedicated_ip" @if ($addon->resource === 'dedicated_ip') selected @endif>Dedicated IP ^</option>
                             </select>
                         </div>
-                        <div class="form-group col-lg-4">
-                            <label for="amountInput">Amount of additional resource</label>
-                            <input type="number" name="amount" value="{{ $addon->amount }}" min="0" class="form-control" id="amountInput" placeholder="Dedicated IP: enter allocation ID">
+                        <div class="form-group col-lg-5">
+                            <label for="amountInput">Additional Amount // ^Comma-separated IP List</label>
+                            <input type="text" name="amount" value="{{ $addon->amount }}" class="form-control" id="amountInput" placeholder="e.g. 1.2.3.4,1.2.3.5,1.2.3.6">
                         </div>
                         <div class="form-group col-lg-4">
-                            <label for="globalLimitInput">Global Limit (max. servers using this add-on) (Optional)</label>
+                            <label for="globalLimitInput">Global Limit (Optional)</label>
                             <input type="number" name="global_limit" value="{{ $addon->global_limit }}" min="0" class="form-control" id="globalLimitInput" placeholder="0 = No servers can use this add-on">
                         </div>
                         <div class="form-group col-lg-4">
-                            <label for="perClientInput">Per Client Limit (max. servers per client using this add-on) (Optional)</label>
+                            <label for="perClientInput">Per Client Limit (Optional)</label>
                             <input type="number" name="per_client_limit" value="{{ $addon->per_client_limit }}" min="0" class="form-control" id="perClientInput" placeholder="0 = No servers can use this add-on">
                         </div>
                         <div class="form-group col-lg-4">
-                            <label for="perServerInput">Per Server Limit (max. quantity per server) (Optional)</label>
+                            <label for="perServerInput">Per Server Limit (Optional)</label>
                             <input type="number" name="per_server_limit" value="{{ $addon->per_server_limit }}" min="0" class="form-control" id="perServerInput" placeholder="Dedicated IP: limit = 1">
                         </div>
                         @php $addon_cycles = $addon_cycle_model->where('addon_id', $id)->get() @endphp
@@ -89,7 +89,7 @@
                             <input type="text" name="cycle[0][init_price]" value="{{ $addon_cycles[0]->init_price }}" class="form-control" placeholder="Use default currency" required>
                         </div>
                         <div class="form-group col-lg-3">
-                            <label>Renew Price</label>
+                            <label>Renewal Price</label>
                             <input type="text" name="cycle[0][renew_price]" value="{{ $addon_cycles[0]->renew_price }}" class="form-control" placeholder="Use default currency" required>
                         </div>
                         <div class="form-group col-lg-3">
@@ -98,39 +98,53 @@
                         </div>
                         <div class="form-group col-lg-12">
                             <hr>
-                            <h5>Additional Billing Cycles (Optional)</h5>
+                            <h5>Additional Billing Cycles</h5>
+                            <button type="button" class="btn btn-primary btn-sm" id="add-cycle"><i class="fas fa-plus"></i> Add Billing Cycle</button>
                         </div>
-                        @for ($i = 1; $i <= 8; $i++)
-                            <div class="form-group col-lg-3">
-                                <label>Cycle Length</label>
-                                <input type="number" name="cycle[{{$i}}][cycle_length]" @if ($addon_cycles->count() >= $i + 1) value="{{ $addon_cycles[$i]->cycle_length }}" @endif class="form-control" placeholder="e.g. Quarterly: enter '3', choose 'Monthly'">
+                        <div class="col-lg-12 row" id="additional-cycles">
+                            @php $i = 0; @endphp
+                            
+                            @foreach ($addon_cycles as $addon_cycle)
+                                @if ($i == 0) @php $i++; @endphp @continue @endif
+
+                            <div class="row col-12">
+                                <div class="form-group col-lg-3">
+                                    <label>Cycle Length</label>
+                                    <input type="number" name="cycle[{{$i}}][cycle_length]" value="{{ $addon_cycle->cycle_length }}" class="form-control" placeholder="e.g. enter '3', choose 'Monthly'">
+                                </div>
+                                <div class="form-group col-lg-3">
+                                    <label>Cycle Type</label>
+                                    <select class="form-control" name="cycle[{{$i}}][cycle_type]">
+                                        <option value="0" @if ($addon_cycle->cycle_type === 0) selected @endif>One-time</option>
+                                        <option value="1" @if ($addon_cycle->cycle_type === 1) selected @endif>Hourly</option>
+                                        <option value="2" @if ($addon_cycle->cycle_type === 2) selected @endif>Daily</option>
+                                        <option value="3" @if ($addon_cycle->cycle_type === 3) selected @endif>Monthly</option>
+                                        <option value="4" @if ($addon_cycle->cycle_type === 4) selected @endif>Yearly</option>
+                                    </select>
+                                </div>
+                                <div class="form-group col-lg-3">
+                                    <label>Initial Price</label>
+                                    <input type="text" name="cycle[{{$i}}][init_price]" value="{{ $addon_cycle->init_price }}" class="form-control" placeholder="Use default currency">
+                                </div>
+                                <div class="form-group col-lg-3">
+                                    <label>Renewal Price</label>
+                                    <input type="text" name="cycle[{{$i}}][renew_price]" value="{{ $addon_cycle->renew_price }}" class="form-control" placeholder="Use default currency">
+                                </div>
+                                <div class="form-group col-lg-3">
+                                    <label>Setup fee</label>
+                                    <input type="text" name="cycle[{{$i}}][setup_fee]" value="{{ $addon_cycle->setup_fee }}" class="form-control" placeholder="Use default currency">
+                                </div>
+                                <div class="form-group col-lg-3">
+                                    <button type="button" class="btn btn-danger btn-sm" onclick="return this.parentNode.parentNode.remove()"><i class="fas fa-trash"></i></button>
+                                </div>
+                                <div class="form-group col-lg-12">
+                                    <hr>
+                                </div>
                             </div>
-                            <div class="form-group col-lg-3">
-                                <label>Cycle Type</label>
-                                <select class="form-control" name="cycle[{{$i}}][cycle_type]">
-                                    <option value="0" @if ($addon_cycles->count() >= $i + 1) @if ($addon_cycles[$i]->cycle_type === 0) selected @endif @endif>One-time</option>
-                                    <option value="1" @if ($addon_cycles->count() >= $i + 1) @if ($addon_cycles[$i]->cycle_type === 1) selected @endif @endif>Hourly</option>
-                                    <option value="2" @if ($addon_cycles->count() >= $i + 1) @if ($addon_cycles[$i]->cycle_type === 2) selected @endif @endif>Daily</option>
-                                    <option value="3" @if ($addon_cycles->count() >= $i + 1) @if ($addon_cycles[$i]->cycle_type === 3) selected @endif @endif>Monthly</option>
-                                    <option value="4" @if ($addon_cycles->count() >= $i + 1) @if ($addon_cycles[$i]->cycle_type === 4) selected @endif @endif>Yearly</option>
-                                </select>
-                            </div>
-                            <div class="form-group col-lg-3">
-                                <label>Initial Price</label>
-                                <input type="text" name="cycle[{{$i}}][init_price]" @if ($addon_cycles->count() >= $i + 1) value="{{ $addon_cycles[$i]->init_price }}" @endif class="form-control" placeholder="Use default currency">
-                            </div>
-                            <div class="form-group col-lg-3">
-                                <label>Renew Price</label>
-                                <input type="text" name="cycle[{{$i}}][renew_price]" @if ($addon_cycles->count() >= $i + 1) value="{{ $addon_cycles[$i]->renew_price }}" @endif class="form-control" placeholder="Use default currency">
-                            </div>
-                            <div class="form-group col-lg-3">
-                                <label>Setup fee</label>
-                                <input type="text" name="cycle[{{$i}}][setup_fee]" @if ($addon_cycles->count() >= $i + 1) value="{{ $addon_cycles[$i]->setup_fee }}" @endif class="form-control" placeholder="Use default currency">
-                            </div>
-                            <div class="form-group col-lg-12">
-                                <hr>
-                            </div>
-                        @endfor
+
+                                @php $i++; @endphp
+                            @endforeach
+                        </div>
                     </div>
                 </form>
                 <form action="{{ route('api.admin.addon.delete', ['id' => $id]) }}" method="DELETE" data-callback="deleteForm" id="deleteForm"></form>
@@ -173,5 +187,48 @@
                 wentWrong()
             }
         }
+
+        var i = {{ $i }}
+
+        $(document).on('click', '#add-cycle', function() {
+            $('#additional-cycles').append(`
+                <div class="row col-12">
+                    <div class="form-group col-lg-3">
+                        <label>Cycle Length</label>
+                        <input type="number" name="cycle[${i}][cycle_length]" class="form-control" placeholder="e.g. enter '3', choose 'Monthly'">
+                    </div>
+                    <div class="form-group col-lg-3">
+                        <label>Cycle Type</label>
+                        <select class="form-control" name="cycle[${i}][cycle_type]">
+                            <option value="0">One-time</option>
+                            <option value="1">Hourly</option>
+                            <option value="2">Daily</option>
+                            <option value="3">Monthly</option>
+                            <option value="4">Yearly</option>
+                        </select>
+                    </div>
+                    <div class="form-group col-lg-3">
+                        <label>Initial Price</label>
+                        <input type="text" name="cycle[${i}][init_price]" class="form-control" placeholder="Use default currency">
+                    </div>
+                    <div class="form-group col-lg-3">
+                        <label>Renewal Price</label>
+                        <input type="text" name="cycle[${i}][renew_price]" class="form-control" placeholder="Use default currency">
+                    </div>
+                    <div class="form-group col-lg-3">
+                        <label>Setup fee</label>
+                        <input type="text" name="cycle[${i}][setup_fee]" class="form-control" placeholder="Use default currency">
+                    </div>
+                    <div class="form-group col-lg-3">
+                        <button type="button" class="btn btn-danger btn-sm" onclick="return this.parentNode.parentNode.remove()"><i class="fas fa-trash"></i></button>
+                    </div>
+                    <div class="form-group col-lg-12">
+                        <hr>
+                    </div>
+                </div>
+            `)
+
+            i++
+        })
     </script>
 @endsection

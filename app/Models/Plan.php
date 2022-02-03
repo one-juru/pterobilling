@@ -18,20 +18,22 @@ class Plan extends Model
         'databases',
         'backups',
         'extra_ports',
-        'nodes_id',
+        'locations_nodes_id',
         'min_port',
+        'max_port',
         'nests_eggs_id',
         'server_description',
         'discount',
         'coupons',
         'days_before_suspend',
+        'days_before_delete',
         'global_limit',
         'per_client_limit',
         'per_client_trial_limit',
         'order',
     ];
 
-    public static function verifyPlan(Plan $plan, Client $client = null)
+    public static function verifyPlan(self $plan, Client $client = null)
     {
         $category_model = new Category;
         $category = Category::find($plan->category_id);
@@ -51,9 +53,9 @@ class Plan extends Model
         return $category_model->verifyCategory($category);
     }
 
-    public static function verifyPlanTrial(Plan $plan, Client $client)
+    public static function verifyPlanTrial(self $plan, Client $client)
     {
-        return (is_null($plan->per_client_trial_limit) || Server::where('client_id', $client->id)->count() < $plan->per_client_trial_limit)
+        return $plan->trial_length && $plan->trial_type && (is_null($plan->per_client_trial_limit) || Server::where('client_id', $client->id)->count() < $plan->per_client_trial_limit)
             && (new Category)->verifyCategoryTrial(Category::find($plan->category_id), $client);
     }
 }

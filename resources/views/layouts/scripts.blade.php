@@ -12,10 +12,10 @@
 <script>
     // CSS Lazy Loading
     function lazyLoadCss(href) {
-        var css = document.createElement('link');
-        css.href = href;
-        css.rel = 'stylesheet';
-        document.getElementsByTagName('head')[0].appendChild(css);
+        var css = document.createElement('link')
+        css.href = href
+        css.rel = 'stylesheet'
+        document.getElementsByTagName('head')[0].appendChild(css)
     }
 
     // Show error toast
@@ -62,7 +62,7 @@
         })
     })
 
-    lazyLoadCss('https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback');
-    lazyLoadCss('/plugins/fontawesome-free/css/all.min.css');
-    lazyLoadCss('/plugins/toastr/toastr.min.css');
+    lazyLoadCss('https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback')
+    lazyLoadCss('/plugins/fontawesome-free/css/all.min.css')
+    lazyLoadCss('/plugins/toastr/toastr.min.css')
 </script>

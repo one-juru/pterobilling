@@ -23,9 +23,9 @@ Route::get('/privacy', 'StoreController@pages')->name('privacy');
 Route::get('/plans/{id?}', 'StoreController@plans')->name('plans');
 
 // Order Server Pages
-Route::prefix('/order/{id}')->middleware('check.store.order')->group(function () {
-    Route::get('/', 'Store\StoreController@order')->name('order');
-    Route::get('/checkout', 'Store\StoreController@checkout')->name('checkout');
+Route::prefix('/order/{id}')->middleware(['auth', 'verified', 'check.store.order'])->group(function () {
+    Route::get('/', 'StoreController@order')->name('order');
+    Route::get('/checkout', 'StoreController@checkout')->name('checkout');
 });
 
 // Affiliate Link
@@ -51,7 +51,11 @@ Route::prefix('/email')->name('verification.')->group(function () {
 
     Route::get('/verify/{id}/{hash}', function (EmailVerificationRequest $request) {
         $request->fulfill();
-        return redirect()->route('client.dash')->with('success_msg', 'Your account has been verified!');
+        
+        $url = session('after_login_url', null);
+        $request->session()->forget('after_login_url');
+        
+        return ($url ? redirect($url) : redirect()->route('client.dash'))->with('success_msg', 'Your account has been verified!');
     })->middleware(['auth', 'signed', 'throttle:6,1'])->withoutMiddleware('verified')->name('verify');
 
     Route::get('/send', function (Request $request) {

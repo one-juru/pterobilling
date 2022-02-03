@@ -22,7 +22,7 @@
                                 <th>Name</th>
                                 <th>Percent Off</th>
                                 <th>Global?</th>
-                                <th>Usable?</th>
+                                <th>Valid?</th>
                                 <th>Expiry Date</th>
                             </tr>
                         </thead>
@@ -56,7 +56,7 @@
                                 <th>Name</th>
                                 <th>Percent Off</th>
                                 <th>Global?</th>
-                                <th>Usable?</th>
+                                <th>Valid?</th>
                                 <th>Expiry Date</th>
                             </tr>
                         </tfoot>

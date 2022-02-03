@@ -26,13 +26,15 @@ class CreatePlansTable extends Migration
             $table->integer('databases')->unsigned();
             $table->integer('backups')->unsigned();
             $table->integer('extra_ports')->unsigned();
-            $table->string('nodes_id');
+            $table->string('locations_nodes_id');
             $table->integer('min_port')->unsigned()->nullable();
+            $table->integer('max_port')->unsigned()->nullable();
             $table->string('nests_eggs_id');
             $table->text('server_description')->nullable();
             $table->integer('discount')->unsigned()->nullable();
             $table->string('coupons')->nullable();
             $table->integer('days_before_suspend')->unsigned()->nullable();
+            $table->integer('days_before_delete')->unsigned()->nullable();
             $table->integer('global_limit')->unsigned()->nullable();
             $table->integer('per_client_limit')->unsigned()->nullable();
             $table->integer('per_client_trial_limit')->unsigned()->nullable();

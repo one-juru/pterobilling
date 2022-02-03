@@ -1,6 +1,8 @@
 @extends('layouts.client')
 
 @inject('invoice_model', 'App\Models\Invoice')
+@inject('server_model', 'App\Models\Server')
+@inject('tax_model', 'App\Models\Tax')
 
 @section('title', 'Invoices')
 
@@ -26,25 +28,26 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach ($invoice_model->where(['client_id' => auth()->user()->id, 'paid' => false]) as $invoice)
+                            @foreach ($invoice_model->where(['client_id' => auth()->user()->id, 'paid' => false])->get() as $invoice)
                                 <tr>
                                     <td><a href="{{ route('client.invoice.show', ['id' => $invoice->id]) }}">{{ $invoice->id }}</a></td>
                                     <td>
                                         @if ($invoice->server_id)
                                             Server #{{ $invoice->server_id }}
                                         @elseif ($invoice->credit_amount)
-                                            {!! session('currency')->symbol !!}{{ number_format($invoice->credit_amount * session('currency')->rate) }} {{ session('currency')->name }} Credit
+                                            {!! session('currency')->symbol !!}{{ $invoice->credit_amount * session('currency')->rate }} {{ session('currency')->name }} Credit
                                         @endif
                                     </td>
                                     @php
-                                        $tax = $tax_model->find($invoice->tax_id);
+                                        if (is_null($tax = $tax_model->find($invoice->tax_id))) {
+                                            $tax = session('tax');
+                                        }
                                     @endphp
                                     <td>
-                                        {!! session('currency')->symbol !!}
                                         @if ($invoice->server_id)
-                                            {{ number_format((($server_model->getTotalCost() + $invoice->late_fee) * ($tax->percent / 100) + $tax->amount) * session('currency')->rate) }} 
+                                            {!! session('currency')->symbol !!}{{ ($server_model->getTotalCost($server_model->find($invoice->server_id)) + $invoice->late_fee) }} 
                                         @elseif ($invoice->credit_amount)
-                                            {{ number_format(($invoice->credit_amount * ($tax->percent / 100) + $tax->amount) * session('currency')->rate) }} 
+                                            {!! session('currency')->symbol !!}{{ $tax_model::getAfterTax($invoice->credit_amount, $invoice->tax_id) * session('currency')->rate }} 
                                         @endif
                                         {{ session('currency')->name }}
                                     </td>
@@ -75,25 +78,26 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach ($invoice_model->where(['client_id' => auth()->user()->id, 'paid' => true]) as $invoice)
+                            @foreach ($invoice_model->where(['client_id' => auth()->user()->id, 'paid' => true])->get() as $invoice)
                                 <tr>
                                     <td><a href="{{ route('client.invoice.show', ['id' => $invoice->id]) }}">{{ $invoice->id }}</a></td>
                                     <td>
                                         @if ($invoice->server_id)
                                             Server #{{ $invoice->server_id }}
                                         @elseif ($invoice->credit_amount)
-                                            {!! session('currency')->symbol !!}{{ number_format($invoice->credit_amount * session('currency')->rate) }} {{ session('currency')->name }} Credit
+                                            {!! session('currency')->symbol !!}{{ $invoice->credit_amount * session('currency')->rate }} {{ session('currency')->name }} Credit
                                         @endif
                                     </td>
                                     @php
-                                        $tax = $tax_model->find($invoice->tax_id);
+                                        if (is_null($tax = $tax_model->find($invoice->tax_id))) {
+                                            $tax = session('tax');
+                                        }
                                     @endphp
                                     <td>
-                                        {!! session('currency')->symbol !!}
                                         @if ($invoice->server_id)
-                                            {{ number_format((($server_model->getTotalCost() + $invoice->late_fee) * ($tax->percent / 100) + $tax->amount) * session('currency')->rate) }} 
+                                            {!! session('currency')->symbol !!}{{ $tax_model::getAfterTax($server_model->getTotalCost() + $invoice->late_fee, $invoice->tax_id) * session('currency')->rate }} 
                                         @elseif ($invoice->credit_amount)
-                                            {{ number_format(($invoice->credit_amount * ($tax->percent / 100) + $tax->amount) * session('currency')->rate) }} 
+                                            {!! session('currency')->symbol !!}{{ $tax_model::getAfterTax($invoice->credit_amount, $invoice->tax_id) * session('currency')->rate }} 
                                         @endif
                                         {{ session('currency')->name }}
                                     </td>

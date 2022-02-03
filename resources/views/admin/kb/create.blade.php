@@ -18,7 +18,7 @@
                             <input type="text" name="name" class="form-control" id="nameInput" placeholder="Category Name" required>
                         </div>
                         <div class="form-group col-lg-6">
-                            <label for="orderInput">Order (The smaller, the higher display priority)</label>
+                            <label for="orderInput">Order (smaller = higher display priority)</label>
                             <input type="text" name="order" value="1000" class="form-control" id="orderInput" placeholder="Order" required>
                         </div>
                     </div>

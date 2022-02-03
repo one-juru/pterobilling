@@ -14,7 +14,7 @@ class TaxController extends ApiController
     {
         $validator = Validator::make($request->all(), [
             'country' => 'required|string|max:255|unique:taxes|not_in:0,Global,global',
-            'percent' => 'nullable|numeric|gt:0',
+            'percent' => 'nullable|numeric|gte:0',
             'amount' => 'nullable|numeric|gte:0',
         ]);
 
@@ -34,7 +34,7 @@ class TaxController extends ApiController
     {
         $validator = Validator::make($request->all(), [
             'country' => ['required', 'string', 'max:255', Rule::unique('taxes')->ignore($id)],
-            'percent' => 'nullable|numeric|gt:0',
+            'percent' => 'nullable|numeric|gte:0',
             'amount' => 'nullable|numeric|gte:0',
         ]);
 
@@ -54,7 +54,7 @@ class TaxController extends ApiController
     {
         $tax = Tax::find($id);
 
-        if ($tax->country === '0')
+        if ($tax->country == 'Global')
             return $this->respondJson(['error' => 'Global cannot be deleted!']);
         
         $tax->delete();

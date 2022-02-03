@@ -1,5 +1,5 @@
 <!-- hCaptcha -->
-<script src='https://www.hCaptcha.com/1/api.js' async defer></script>
+<script src='https://js.hcaptcha.com/1/api.js' async defer></script>
 
 <script>
     // Change pages without refresh
@@ -30,7 +30,7 @@
         if (data.success) {
             toastr.success(data.success)
             resetForms()
-            waitRedirect('{{ route('client.dash') }}')
+            waitRedirect(data.url ? data.url : '{{ route('client.dash') }}')
         } else if (data.error) {
             toastr.error(data.error)
         } else if (data.errors) {

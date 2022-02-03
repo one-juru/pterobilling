@@ -24,13 +24,21 @@ class IssueServerInvoice implements ShouldQueue
     protected $server;
 
     /**
+     * The total due amount.
+     *
+     * @var float
+     */
+    protected $total;
+
+    /**
      * Create a new job instance.
      *
      * @return void
      */
-    public function __construct(Server $server)
+    public function __construct(Server $server, float $total)
     {
         $this->server = $server;
+        $this->total = $total;
     }
 
     /**
@@ -44,10 +52,11 @@ class IssueServerInvoice implements ShouldQueue
         $invoice = Invoice::create([
             'client_id' => $client->id,
             'server_id' => $this->server->id,
+            'total' => $this->total,
             'payment_method' => $this->server->payment_method,
             'due_date' => $this->server->due_date,
         ]);
 
-        $client->notify(new PayInvoiceNotif($invoice->id));
+        $client->notify(new PayInvoiceNotif($invoice));
     }
 }

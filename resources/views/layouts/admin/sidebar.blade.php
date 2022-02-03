@@ -219,7 +219,7 @@
                     </ul>
                 </li>
                 <li class="nav-header">EXTENSIONS</li>
-                @foreach ($extension_manager->getAllExtensions() as $extension)
+                @foreach ($extension_manager->getAllExtensionsWithSettings() as $extension)
                     <li class="nav-item">
                         <a href="{{ route('admin.extension.show', ['id' => $extension::$display_name]) }}" class="nav-link">
                             <i class="nav-icon fas fa-plug"></i>

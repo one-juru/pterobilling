@@ -18,10 +18,10 @@ class CreatePlanCyclesTable extends Migration
             $table->integer('plan_id')->unsigned();
             $table->integer('cycle_length')->unsigned();
             $table->tinyInteger('cycle_type')->unsigned();
-            $table->decimal('init_price')->unsigned();
-            $table->decimal('renew_price')->unsigned();
-            $table->decimal('setup_fee')->unsigned()->default(0.00);
-            $table->decimal('late_fee')->unsigned()->default(0.00);
+            $table->decimal('init_price', 16, 6)->unsigned();
+            $table->decimal('renew_price', 16, 6)->unsigned();
+            $table->decimal('setup_fee', 16, 6)->unsigned()->default(0);
+            $table->decimal('late_fee', 16, 6)->unsigned()->default(0);
             $table->integer('trial_length')->unsigned()->nullable();
             $table->tinyInteger('trial_type')->unsigned()->nullable();
             $table->timestamps();

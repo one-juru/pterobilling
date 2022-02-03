@@ -57,7 +57,13 @@ class AuthController extends ApiController
             'tax' => Tax::where('country', auth()->user()->country)->first(),
         ]);
         
-        return $this->respondJson(['success' => 'Welcome back! Redirecting...']);
+        $url = session('after_login_url', null);
+        $request->session()->forget('after_login_url');
+
+        return $this->respondJson([
+            'success' => 'Welcome back! Redirecting...',
+            'url' => $url,
+        ]);
     }
 
     public function register(Request $request)

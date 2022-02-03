@@ -21,7 +21,7 @@
                             <input type="text" name="subject" value="{{ $article->subject }}" class="form-control" id="subjectInput" placeholder="Subject" required>
                         </div>
                         <div class="form-group col-lg-6">
-                            <label for="orderInput">Order (The smaller, the higher display priority)</label>
+                            <label for="orderInput">Order (smaller = higher display priority)</label>
                             <input type="text" name="order" value="{{ $article->order }}" class="form-control" id="orderInput" placeholder="Order" required>
                         </div>
                         <div class="form-group col-12">

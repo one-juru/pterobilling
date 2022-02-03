@@ -16,9 +16,10 @@ class CreateCouponsTable extends Migration
         Schema::create('coupons', function (Blueprint $table) {
             $table->id();
             $table->string('code')->unique();
-            $table->integer('percent_off')->unsigned();
-            $table->integer('global_limit')->unsigned()->default(0);
-            $table->integer('per_client_limit')->unsigned()->default(0);
+            $table->decimal('percent_off')->unsigned();
+            $table->boolean('one_time')->default(false);
+            $table->integer('global_limit')->unsigned()->nullable();
+            $table->integer('per_client_limit')->unsigned()->nullable();
             $table->boolean('is_global')->default(false);
             $table->timestamp('end_date')->nullable();
             $table->timestamps();

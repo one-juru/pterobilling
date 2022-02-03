@@ -15,7 +15,8 @@ class CouponController extends ApiController
     {
         $validator = Validator::make($request->all(), [
             'code' => 'required|string|max:255|unique:coupons',
-            'percent_off' => 'required|integer|gte:1|lte:100',
+            'percent_off' => 'required|numeric|gt:0|lte:100',
+            'one_time' => 'required|boolean',
             'global_limit' => 'nullable|integer|gte:0',
             'per_client_limit' => 'nullable|integer|gte:0',
             'is_global' => 'required|boolean',
@@ -28,6 +29,7 @@ class CouponController extends ApiController
         Coupon::create([
             'code' => $request->input('code'),
             'percent_off' => $request->input('percent_off'),
+            'one_time' => $request->input('one_time') === '1',
             'global_limit' => $request->input('global_limit'),
             'per_client_limit' => $request->input('per_client_limit'),
             'is_global' => $request->input('is_global') === '1',
@@ -41,7 +43,8 @@ class CouponController extends ApiController
     {
         $validator = Validator::make($request->all(), [
             'code' => ['required', 'string', 'max:255', Rule::unique('coupons')->ignore($id)],
-            'percent_off' => 'required|integer|gte:1|lte:100',
+            'percent_off' => 'required|numeric|gt:0|lte:100',
+            'one_time' => 'required|boolean',
             'global_limit' => 'nullable|integer|gte:0',
             'per_client_limit' => 'nullable|integer|gte:0',
             'is_global' => 'required|boolean',
@@ -54,6 +57,7 @@ class CouponController extends ApiController
         $coupon = Coupon::find($id);
         $coupon->code = $request->input('code');
         $coupon->percent_off = $request->input('percent_off');
+        $coupon->one_time = $request->input('one_time') === 1;
         $coupon->global_limit = $request->input('global_limit');
         $coupon->per_client_limit = $request->input('per_client_limit');
         $coupon->is_global = $request->input('is_global') === 1;

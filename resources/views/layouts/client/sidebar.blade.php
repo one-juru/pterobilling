@@ -56,7 +56,7 @@
                     <li class="nav-item">
                         <a href="javascript:void(0);" class="nav-link">
                             <i class="fas fa-server nav-icon"></i>
-                            <p><span data-server-name="{{ $server->identifier }}">Loading...</span> <i class="right fas fa-angle-left"></i></p>
+                            <p>{{ $server->server_name }} <i class="right fas fa-angle-left"></i></p>
                         </a>
                         <ul class="nav nav-treeview">
                             <li class="nav-item">

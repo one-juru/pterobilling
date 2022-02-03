@@ -1,6 +1,7 @@
 @extends('layouts.client')
 
 @inject('credit_model', 'App\Models\Credit')
+@inject('extension_manager', 'Extensions\ExtensionManager')
 
 @section('title', 'Account Credit')
 
@@ -22,19 +23,21 @@
                 <div class="card-header">
                     <h3 class="card-title">Add Fund</h3>
                 </div>
-                <form action="" method="POST">
+                <form action="{{ route('api.client.credit.add') }}" method="POST" data-callback="addForm">
                     @csrf
 
                     <div class="card-body">
                         <div class="form-group">
                             <label for="creditInput">Credit Amount</label>
-                            <input type="number" name="credit" min="5" max="1000" step="1" class="form-control" id="creditInput" placeholder="Credit Amount" required>
+                            <input type="text" name="credit" class="form-control" id="creditInput" placeholder="Credit Amount" required>
                         </div>
                         <div class="form-group">
                             <label class="form-check-label">Payment Method</label>
-                            <select name="gateway" class="form-control">
-                                <option value="PayPal">PayPal</option>
-                            </select>
+                            @foreach ($extension_manager::$gateways as $gateway)
+                                <select name="gateway" class="form-control">
+                                    <option value="{{ $gateway::$display_name }}">{{ $gateway::$display_name }}</option>
+                                </select>
+                            @endforeach
                         </div>
                     </div>
                     <div class="card-footer">
@@ -62,7 +65,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach ($credit_model->where('client_id', auth()->user()->id) as $credit)
+                            @foreach ($credit_model->where('client_id', auth()->user()->id)->latest()->get() as $credit)
                                 <tr>
                                     <td>{{ $credit->id }}</td>
                                     <td>{{ $credit->details }}</td>
@@ -84,4 +87,21 @@
             </div>
         </div>
     </div>
+@endsection
+
+@section('client_scripts')
+    <script>
+        function addForm(data) {
+            if (data.info) {
+                toastr.info(data.info)
+                waitRedirect(data.url)
+            } else if (data.error) {
+                toastr.error(data.error)
+            } else if (data.errors) {
+                data.errors.forEach(error => { toastr.error(error) });
+            } else {
+                wentWrong()
+            }
+        }
+    </script>
 @endsection

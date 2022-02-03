@@ -15,16 +15,7 @@ class Seeder extends DatabaseSeeder
     public function run()
     {
         $i = 0;
-
-        if (is_null(Extension::where(['extension' => 'Cloudflare', 'key' => 'enabled'])->first())) {
-            Extension::create([
-                'extension' => 'Cloudflare',
-                'key' => 'enabled',
-                'value' => 'false',
-            ]);
-            ++$i;
-        }
-
+        
         if (is_null(Extension::where(['extension' => 'Cloudflare', 'key' => 'email'])->first())) {
             Extension::create([
                 'extension' => 'Cloudflare',

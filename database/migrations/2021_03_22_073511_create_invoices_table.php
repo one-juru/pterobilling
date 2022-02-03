@@ -17,9 +17,9 @@ class CreateInvoicesTable extends Migration
             $table->id();
             $table->integer('client_id')->unsigned();
             $table->integer('server_id')->unsigned()->nullable();
-            $table->decimal('credit_amount')->unsigned()->nullable();
-            $table->integer('tax_id')->unsigned()->nullable();
-            $table->decimal('late_fee')->unsigned()->nullable();
+            $table->decimal('credit_amount', 16, 6)->unsigned()->nullable();
+            $table->decimal('total', 16, 6)->unsigned();
+            $table->decimal('late_fee', 16, 6)->unsigned()->nullable();
             $table->string('payment_method')->nullable();
             $table->timestamp('due_date')->nullable();
             $table->boolean('paid')->default(false);

@@ -11,29 +11,40 @@ use Illuminate\Support\Facades\Validator;
 
 class AddonController extends ApiController
 {
+    private $rules = [
+        'name' => 'required|string|max:255',
+        'description' => 'nullable|string',
+        'order' => 'required|numeric',
+        'resource' => 'required|string|in:ram,cpu,disk,database,backup,extra_port,dedicated_ip',
+        'amount' => 'required',
+        'category' => 'required|array',
+        'global_limit' => 'nullable|integer|gte:0',
+        'per_client_limit' => 'nullable|integer|gte:0',
+        'per_server_limit' => 'nullable|integer|gte:0',
+        'cycle' => 'required|array',
+        'cycle.*.cycle_length' => 'required|integer|gte:1',
+        'cycle.*.cycle_type' => 'required|integer|in:0,1,2,3,4',
+        'cycle.*.init_price' => 'required|numeric|gte:0',
+        'cycle.*.renew_price' => 'required|numeric|gte:0',
+        'cycle.*.setup_fee' => 'required|numeric|gte:0',
+    ];
+
     public function create(Request $request)
     {
-        $validator = Validator::make($request->all(), [
-            'name' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'order' => 'required|numeric',
-            'resource' => 'required|string|in:ram,cpu,disk,database,backup,extra_port,dedicated_ip',
-            'amount' => 'required|integer|gte:1',
-            'category' => 'required|array',
-            'global_limit' => 'nullable|integer|gte:0',
-            'per_client_limit' => 'nullable|integer|gte:0',
-            'per_server_limit' => 'nullable|integer|gte:0',
-            'cycle' => 'required|array'
-        ]);
+        $validator = Validator::make($request->all(), $this->rules);
+        $validator->sometimes('amount', 'integer', function () use ($request) {
+            return $request->input('resource') != 'dedicated_ip';
+        });
 
         if ($validator->fails())
             return $this->respondJson(['errors' => $validator->errors()->all()]);
 
+        $amount = $request->input('amount');
         $addon = Addon::create([
             'name' => $request->input('name'),
             'description' => $request->input('description'),
             'resource' => $request->input('resource'),
-            'amount' => $request->input('amount'),
+            'amount' => ctype_digit($amount) ? $amount : str_replace(' ', '', $amount),
             'categories' => json_encode($request->input('category')),
             'global_limit' => $request->input('global_limit'),
             'per_client_limit' => $request->input('per_client_limit'),
@@ -41,17 +52,7 @@ class AddonController extends ApiController
             'order' => $request->input('order'),
         ]);
 
-        foreach ($request->input('cycle') as $cycle) {
-            $validator = Validator::make($cycle, [
-                'cycle_length' => 'required|integer|gte:1',
-                'cycle_type' => 'required|integer|in:0,1,2,3,4',
-                'init_price' => 'required|numeric|gte:0',
-                'renew_price' => 'required|numeric|gte:0',
-                'setup_fee' => 'required|numeric|gte:0',
-            ]);
-
-            if ($validator->fails()) continue;
-
+        foreach ($request->input('cycle') as $cycle)
             AddonCycle::create([
                 'addon_id' => $addon->id,
                 'cycle_length' => $cycle['cycle_length'],
@@ -60,25 +61,16 @@ class AddonController extends ApiController
                 'renew_price' => $cycle['renew_price'],
                 'setup_fee' => $cycle['setup_fee'],
             ]);
-        }
 
         return $this->respondJson(['success' => 'You have created a plan add-on successfully!']);
     }
     
     public function update(Request $request, $id)
     {
-        $validator = Validator::make($request->all(), [
-            'name' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'order' => 'required|numeric',
-            'resource' => 'required|string|in:ram,cpu,disk,database,backup,extra_port,dedicated_ip',
-            'amount' => 'required|integer|gte:1',
-            'category' => 'required|array',
-            'global_limit' => 'nullable|integer|gte:0',
-            'per_client_limit' => 'nullable|integer|gte:0',
-            'per_server_limit' => 'nullable|integer|gte:0',
-            'cycle' => 'required|array'
-        ]);
+        $validator = Validator::make($request->all(), $this->rules);
+        $validator->sometimes('amount', 'integer', function () use ($request) {
+            return $request->input('resource') != 'dedicated_ip';
+        });
 
         if ($validator->fails())
             return $this->respondJson(['errors' => $validator->errors()->all()]);
@@ -87,7 +79,8 @@ class AddonController extends ApiController
         $addon->name = $request->input('name');
         $addon->description = $request->input('description');
         $addon->resource = $request->input('resource');
-        $addon->amount = $request->input('amount');
+        $amount = $request->input('amount');
+        $addon->amount = ctype_digit($amount) ? $amount : str_replace(' ', '', $amount);
         $addon->categories = json_encode($request->input('category'));
         $addon->global_limit = $request->input('global_limit');
         $addon->per_client_limit = $request->input('per_client_limit');
@@ -105,17 +98,7 @@ class AddonController extends ApiController
             }
         }
 
-        foreach ($request->input('cycle') as $cycle) {
-            $validator = Validator::make($cycle, [
-                'cycle_length' => 'required|integer|gte:1',
-                'cycle_type' => 'required|integer|in:0,1,2,3,4',
-                'init_price' => 'required|numeric|gte:0',
-                'renew_price' => 'required|numeric|gte:0',
-                'setup_fee' => 'required|numeric|gte:0',
-            ]);
-
-            if ($validator->fails()) continue;
-
+        foreach ($request->input('cycle') as $cycle)
             AddonCycle::create([
                 'addon_id' => $addon->id,
                 'cycle_length' => $cycle['cycle_length'],
@@ -124,7 +107,6 @@ class AddonController extends ApiController
                 'renew_price' => $cycle['renew_price'],
                 'setup_fee' => $cycle['setup_fee'],
             ]);
-        }
         
         return $this->respondJson(['success' => 'You have updated the plan add-on successfully!', 'delete_failed' => $delete_failed]);
     }

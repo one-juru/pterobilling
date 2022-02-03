@@ -99,3 +99,8 @@ Route::prefix('/setting')->name('setting.')->group(function () {
     Route::put('/store', 'Api\Admin\SettingController@store')->name('store');
     Route::put('/page', 'Api\Admin\SettingController@page')->name('page');
 });
+
+// Extensions
+Route::prefix('/extension/{id}')->name('extension.')->group(function () {
+    Route::put('/', 'Admin\ExtensionController@store')->name('update');
+});

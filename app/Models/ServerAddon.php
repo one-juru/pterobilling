@@ -10,6 +10,6 @@ class ServerAddon extends Model
         'addon_id',
         'server_id',
         'client_id',
-        'quantity',
+        'value',
     ];
 }

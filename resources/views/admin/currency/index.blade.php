@@ -22,6 +22,7 @@
                                 <th>Name</th>
                                 <th>Symbol</th>
                                 <th>Conversion Rate</th>
+                                <th>Precision</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -31,6 +32,7 @@
                                     <td>{{ $currency->name }}</td>
                                     <td>{!! $currency->symbol !!}</td>
                                     <td>{{ $currency->rate }}</td>
+                                    <td>{{ $currency->precision }}</td>
                                 </tr>
                             @endforeach
                         </tbody>
@@ -40,6 +42,7 @@
                                 <th>Name</th>
                                 <th>Symbol</th>
                                 <th>Conversion Rate</th>
+                                <th>Precision</th>
                             </tr>
                         </tfoot>
                     </table>

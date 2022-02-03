@@ -14,7 +14,7 @@
         <div class="col-lg-3 col-md-6">
             <div class="small-box bg-success">
                 <div class="inner">
-                    <h3>{!! session('currency')->symbol !!}{{ number_format(auth()->user()->credit * session('currency')->rate, 2) }} {{ session('currency')->name }}</h3>
+                    <h3>{!! session('currency')->symbol !!}{{ auth()->user()->credit * session('currency')->rate }} {{ session('currency')->name }}</h3>
                     <p>Account Credit</p>
                 </div>
                 <div class="icon">
@@ -93,13 +93,7 @@
                                 <tr>
                                     <td><a href="{{ route('client.server.show', ['id' => $server->id]) }}">{{ $server->id }}</a></td>
                                     <td>{{ $plan_model->where('id', $server->plan_id)->value('name') }}</td>
-                                    <td>
-                                        @if(session('server_' . $server->id))
-                                            {{ session('server_' . $server->id) }}
-                                        @else
-                                            Server #{{ $server->id }}
-                                        @endif
-                                    </td>
+                                    <td>{{ $server->server_name }}</td>
                                     <td><span id="server_status_{{ $server->identifier }}"><span class="badge bg-warning">Loading</span></span></td>
                                 </tr>
                             @endforeach
@@ -175,15 +169,16 @@
                             @foreach ($invoice_model->where(['client_id' => auth()->user()->id, 'paid' => false])->get() as $invoice)
                                 <tr>
                                     <td><a href="{{ route('client.invoice.index', ['id' => $invoice->id]) }}">{{ $invoice->id }}</a></td>
-                                    <td>{{ json_decode($invoice->products, true)[0] }}</td>
-                                    @php
-                                        $total = 0.00;
-                                        foreach ($invoice->prices as $price) {
-                                            $total += $price;
-                                        }
-                                        $total = $total * ($tax_model->find($invoice->tax_id)->percent / 100);
-                                    @endphp
-                                    <td>{!! session('currency')->symbol !!}{{ number_format($total * session('currency')->rate, 2) }} {{ session('currency')->name }}</td>
+                                    <td>
+                                        @if ($invoice->server_id)
+                                            @php $total = $server_model::getTotalCost($server_model->find($invoice->server_id)); @endphp
+                                            Server #{{ $invoice->server_id }}
+                                        @elseif ($invoice->credit_amount)
+                                            @php $total = $invoice->credit_amount; @endphp
+                                            {!! session('currency')->symbol !!}{{ $invoice->credit_amount * session('currency')->rate }} {{ session('currency')->name }} Credit
+                                        @endif
+                                    </td>
+                                    <td>{!! session('currency')->symbol !!}{{ $tax_model::getAfterTax($total, $invoice->tax_id) * session('currency')->rate }} {{ session('currency')->name }}</td>
                                     <td>{{ $invoice->due_date }}</td>
                                 </tr>
                             @endforeach

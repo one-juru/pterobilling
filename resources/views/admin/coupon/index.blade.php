@@ -22,8 +22,9 @@
                                 <th>ID</th>
                                 <th>Code</th>
                                 <th>Percent Off</th>
+                                <th>One-time?</th>
                                 <th>Global?</th>
-                                <th>Usable?</th>
+                                <th>Valid?</th>
                                 <th>Total Uses</th>
                                 <th>Expiry Date</th>
                             </tr>
@@ -34,6 +35,13 @@
                                     <td><a href="{{ route('admin.coupon.show', ['id' => $coupon->id]) }}">{{ $coupon->id }}</a></td>
                                     <td>{{ $coupon->code }}</td>
                                     <td>{{ $coupon->percent_off }}%</td>
+                                    <td>
+                                        @if ($coupon->one_time)
+                                            <i class="fas fa-check"></i> Yes
+                                        @else
+                                            <i class="fas fa-times"></i> No
+                                        @endif
+                                    </td>
                                     <td>
                                         @if ($coupon->is_global)
                                             <i class="fas fa-check"></i> Yes
@@ -58,8 +66,9 @@
                                 <th>ID</th>
                                 <th>Code</th>
                                 <th>Percent Off</th>
+                                <th>One-time?</th>
                                 <th>Global?</th>
-                                <th>Usable?</th>
+                                <th>Valid?</th>
                                 <th>Total Uses</th>
                                 <th>Expiry Date</th>
                             </tr>

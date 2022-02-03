@@ -1,7 +1,5 @@
 <?php
 
-use Extensions\ExtensionManager;
-
 return [
 
     /*
@@ -15,7 +13,7 @@ return [
     |
     */
 
-    'paths' => array_merge([resource_path('views')], ExtensionManager::getAllViews()),
+    'paths' => [resource_path('views')],
 
     /*
     |--------------------------------------------------------------------------
@@ -28,9 +26,6 @@ return [
     |
     */
 
-    'compiled' => env(
-        'VIEW_COMPILED_PATH',
-        realpath(storage_path('framework/views'))
-    ),
+    'compiled' => env('VIEW_COMPILED_PATH', realpath(storage_path('framework/views'))),
 
 ];

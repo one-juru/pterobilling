@@ -15,7 +15,8 @@ class CurrencyController extends ApiController
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|size:3|unique:currencies',
             'symbol' => 'required|string',
-            'rate' => 'required|numeric|gt:0',
+            'rate' => 'exclude_if:default,1|required|numeric|gt:0',
+            'precision' => 'required|numeric|gte:0',
             'default' => 'required|boolean',
         ]);
 
@@ -32,6 +33,7 @@ class CurrencyController extends ApiController
             'name' => $request->input('name'),
             'symbol' => $request->input('symbol'),
             'rate' => $request->input('rate'),
+            'precision' => $request->input('precision'),
             'default' => $request->input('default') === '1',
         ]);
         
@@ -43,7 +45,8 @@ class CurrencyController extends ApiController
         $validator = Validator::make($request->all(), [
             'name' => ['required', 'string', 'size:3', Rule::unique('currencies')->ignore($id)],
             'symbol' => 'required|string',
-            'rate' => 'required|numeric|gt:0',
+            'rate' => 'exclude_if:default,1|required|numeric|gt:0',
+            'precision' => 'required|numeric|gte:0',
             'default' => 'required|boolean',
         ]);
 
@@ -60,6 +63,7 @@ class CurrencyController extends ApiController
         $currency->name = $request->input('name');
         $currency->symbol = $request->input('symbol');
         $currency->rate = $request->input('default') === '1' ? 1 : $request->input('rate');
+        $currency->precision = $request->input('precision');
         $currency->default = $request->input('default') === '1';
         $currency->save();
 

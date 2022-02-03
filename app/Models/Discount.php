@@ -14,7 +14,7 @@ class Discount extends Model
         'end_date',
     ];
 
-    public static function verifyDiscount(Discount $discount)
+    public static function verifyDiscount(self $discount)
     {
         return Carbon::parse($discount->end_date)->timestamp > Carbon::now()->timestamp || is_null($discount->end_date) ? $discount : false;
     }

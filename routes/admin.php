@@ -62,7 +62,7 @@ Route::prefix('/category')->name('category.')->group(function () {
 
 // Server Add-ons
 Route::prefix('/addon')->name('addon.')->group(function () {
-    Route::get('/addon', 'Admin\PlanController@addons')->name('index');
+    Route::get('/', 'Admin\PlanController@addons')->name('index');
     Route::get('/create', 'Admin\PlanController@createAddon')->name('create');
 
     Route::prefix('/view/{id}')->middleware('check.admin.addon')->group(function () {
@@ -175,5 +175,4 @@ Route::prefix('/page')->name('page.')->group(function () {
 // Extensions
 Route::prefix('/extension/{id}')->name('extension.')->group(function () {
     Route::get('/', 'Admin\ExtensionController@show')->name('show');
-    Route::put('/', 'Admin\ExtensionController@update');
 });

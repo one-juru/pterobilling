@@ -2,26 +2,25 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Controllers\Controller;
+use App\Http\Controllers\Api\ApiController;
 use Extensions\ExtensionManager;
 use Illuminate\Http\Request;
 
-class ExtensionController extends Controller
+class ExtensionController extends ApiController
 {
     public function show($id)
     {
-        $extension = $this->getExtension($id);
+        if (is_null($extension = ExtensionManager::getExtension($id)))
+            return abort(404);
+            
         return $extension::show();
     }
 
     public function store(Request $request, $id)
     {
-        $extension = $this->getExtension($id);
-        return $extension::store($request);
-    }
+        if (is_null($extension = ExtensionManager::getExtension($id)))
+            return abort(404);
 
-    private function getExtension($name)
-    {
-        foreach (ExtensionManager::getAllExtensions() as $extension) if ($extension::$display_name == urldecode($name)) return $extension;
+        return $this->respondJson($extension::store($request));
     }
 }

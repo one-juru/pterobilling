@@ -26,8 +26,13 @@ class CreateServersTable extends Migration
             $table->string('subdomain')->nullable();
             $table->integer('subdomain_port')->unsigned()->nullable();
             $table->string('subdomain_provider')->nullable();
+            $table->string('server_name');
+            $table->integer('nest_id')->unsigned();
+            $table->integer('egg_id')->unsigned();
+            $table->integer('location_id')->unsigned();
+            $table->integer('node_id')->unsigned();
+            $table->string('ip_address')->nullable();
             $table->tinyInteger('status')->unsigned()->default(1);
-            $table->timestamp('last_notif')->nullable();
             $table->timestamps();
         });
     }

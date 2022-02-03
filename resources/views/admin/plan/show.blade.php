@@ -27,7 +27,7 @@
                             <textarea name="description" class="form-control" id="descriptionInput" placeholder="Around 10 words recommended">{{ $plan->description }}</textarea>
                         </div>
                         <div class="form-group col-lg-4">
-                            <label for="orderInput">Order (The smaller, the higher display priority)</label>
+                            <label for="orderInput">Order (smaller = higher display priority)</label>
                             <input type="text" name="order" value="{{ $plan->order }}" value="1000" class="form-control" id="orderInput" placeholder="Order" required>
                         </div>
                         <div class="form-group col-lg-3">
@@ -66,81 +66,99 @@
                             <label for="backupsInput">Backups</label>
                             <input type="number" name="backups" value="{{ $plan->backups }}" min="0" class="form-control" id="backupsInput" placeholder="Backups" required>
                         </div>
-                        <div class="form-group col-lg-3">
-                            <label for="extraPortsInput">Extra Ports</label>
-                            <input type="number" name="extra_ports" value="{{ $plan->extra_ports }}" min="0" class="form-control" id="extraPortsInput" placeholder="Extra Ports" required>
+                        <div class="col-lg-4 row">
+                            @php
+                                $pterodactyl_api = new PterodactylSDK\PterodactylAPI;
+                                $location_api = $pterodactyl_api->locations()->getAll();
+                            @endphp
+                            <div class="form-group">
+                                <label>Locations / Nodes</label>
+                                @if ($location_api->status() === '200' && empty($location_api->errors()))
+                                    @foreach ($location_api->response()->data as $location)
+                                        <br><label>{{ $location->attributes->id }} - {{ $location->attributes->long }} ({{ $location->attributes->short }})</label>
+                                        @foreach ($location->attributes->relationships->nodes->data as $node)
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" name="node[]" value="{{ $location->attributes->id }}:{{ $node->attributes->id }}" @if (in_array($location->attributes->id.':'.$node->attributes->id, json_decode($plan->locations_nodes_id, true))) checked @endif>
+                                                <p class="form-check-label">{{ $node->attributes->name}}</p>
+                                            </div>
+                                        @endforeach
+                                    @endforeach
+                                @endif
+                            </div>
+                            @php
+                                $nest_api = $pterodactyl_api->nests()->getAll();
+                                $nests_eggs = json_decode($plan->nests_eggs_id, true);
+                            @endphp
+                            <div class="form-group">
+                                <label>Nests / Eggs</label>
+                                @if ($nest_api->status() === '200' && empty($nest_api->errors()))
+                                    @foreach ($nest_api->response()->data as $nest)
+                                        <br><label>{{ $nest->attributes->id }} - {{ $nest->attributes->name }}</label>
+                                        @foreach ($nest->attributes->relationships->eggs->data as $egg)
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" name="egg[]" value="{{ $nest->attributes->id }}:{{ $egg->attributes->id }}" @if (in_array($nest->attributes->id.':'.$egg->attributes->id, $nests_eggs)) checked @endif>
+                                                <p class="form-check-label">{{ $egg->attributes->name }}</p>
+                                            </div>
+                                        @endforeach
+                                    @endforeach
+                                @endif
+                            </div>
                         </div>
-                        @php
-                            $pterodactyl_api = new PterodactylSDK\PterodactylAPI;
-                            $node_api = $pterodactyl_api->nodes()->getAll();
-                        @endphp
-                        <div class="form-group col-lg-3">
-                            <label>Nodes</label>
-                            @if ($node_api->status() === '200' && empty($node_api->errors()))
-                                @foreach ($node_api->response()->data as $node)
+                        <div class="col-lg-8 row">
+                            <div class="form-group col-lg-4">
+                                <label for="extraPortsInput">Extra Ports</label>
+                                <input type="number" name="extra_ports" value="{{ $plan->extra_ports }}" min="0" class="form-control" id="extraPortsInput" placeholder="Extra Ports" required>
+                            </div>
+                            <div class="form-group col-lg-4">
+                                <label for="minPortInput">Minimum Port (Optional)</label>
+                                <input type="number" name="min_port" value="{{ $plan->min_port }}" class="form-control" id="minPortInput" placeholder="e.g. 25565">
+                            </div>
+                            <div class="form-group col-lg-4">
+                                <label for="maxPortInput">Maximum Port (Optional)</label>
+                                <input type="number" name="max_port" value="{{ $plan->max_port }}" class="form-control" id="maxPortInput" placeholder="e.g. 25575">
+                            </div>
+                            <div class="form-group col-lg-12">
+                                <label for="serverDescriptionInput">Server Description (Optional)</label>
+                                <textarea name="server_description" class="form-control" id="serverDescriptionInput" placeholder="Only displayed on Pterodactyl panel">{{ $plan->server_description }}</textarea>
+                            </div>
+                            <div class="form-group col-lg-6">
+                                <label>Discount (Optional)</label>
+                                <select class="form-control" name="discount">
+                                    <option></option>
+                                    @foreach ($discount_model->getValidDiscounts() as $discount)
+                                        <option value="{{ $discount->id }}"  @if ($discount->id === $plan->discount) selected @endif>{{ $discount->name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="form-group col-lg-6">
+                                <label>Coupons (Optional)</label>
+                                @foreach ($coupon_model->getValidCoupons() as $coupon)
                                     <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" name="node[]" value="{{ $node->attributes->id }}" @if (in_array($node->attributes->id, json_decode($plan->nodes_id, true))) checked @endif>
-                                        <p class="form-check-label">{{ $node->attributes->name}}</p>
+                                        <input class="form-check-input" type="checkbox" name="coupon[]" value="{{ $coupon->id }}" @if (in_array($coupon->id, json_decode($plan->coupons, true))) checked @endif>
+                                        <p class="form-check-label">{{ $coupon->code }}</p>
                                     </div>
                                 @endforeach
-                            @endif
-                        </div>
-                        <div class="form-group col-lg-3">
-                            <label for="minPortInput">Minimum Port (Optional)</label>
-                            <input type="number" name="min_port" value="{{ $plan->min_port }}" class="form-control" id="minPortInput" placeholder="Servers cannot be allocated on port numbers smaller than this">
-                        </div>
-                        @php $nest_api = $pterodactyl_api->nests()->getAll(); @endphp
-                        <div class="form-group col-lg-3">
-                            <label>Eggs</label><br>
-                            @if ($nest_api->status() === '200' && empty($nest_api->errors()))
-                                @foreach ($nest_api->response()->data as $nest)
-                                    <label>{{ $nest->attributes->id }} - {{ $nest->attributes->name }}</label>
-                                    @foreach ($nest->attributes->relationships->eggs->data as $egg)
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="checkbox" name="egg[]" value="{{ $nest->attributes->id }}:{{ $egg->attributes->id }}" @if (in_array($nest->attributes->id.':'.$egg->attributes->id, json_decode($plan->nests_eggs_id, true))) checked @endif>
-                                            <p class="form-check-label">{{ $egg->attributes->name }}</p>
-                                        </div>
-                                    @endforeach
-                                @endforeach
-                            @endif
-                        </div>
-                        <div class="form-group col-lg-4">
-                            <label for="serverDescriptionInput">Server Description (Optional)</label>
-                            <textarea name="server_description" class="form-control" id="serverDescriptionInput" placeholder="Only displayed on Pterodactyl panel">{{ $plan->server_description }}</textarea>
-                        </div>
-                        <div class="form-group col-lg-4">
-                            <label>Discount (Optional)</label>
-                            <select class="form-control" name="discount">
-                                <option></option>
-                                @foreach ($discount_model->getValidDiscounts() as $discount)
-                                    <option value="{{ $discount->id }}"  @if ($discount->id === $plan->discount) selected @endif>{{ $discount->name }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <div class="form-group col-lg-4">
-                            <label>Coupons (Optional)</label>
-                            @foreach ($coupon_model->getValidCoupons() as $coupon)
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" name="coupon[]" value="{{ $coupon->id }}" @if (in_array($coupon->id, json_decode($plan->coupons, true))) checked @endif>
-                                    <p class="form-check-label">{{ $coupon->code }}</p>
-                                </div>
-                            @endforeach
-                        </div>
-                        <div class="form-group col-lg-3">
-                            <label for="daysSuspendInput">Days before server suspension (Optional)</label>
-                            <input type="number" name="days_before_suspend" value="{{ $plan->days_before_suspend }}" class="form-control" id="daysSuspendInput" placeholder="0 = Instantly suspended when overdue">
-                        </div>
-                        <div class="form-group col-lg-3">
-                            <label for="globalLimitInput">Global Limit (max. servers using this plan) (Optional)</label>
-                            <input type="number" name="global_limit" value="{{ $plan->global_limit }}" class="form-control" id="globalLimitInput" placeholder="0 = No servers can be created">
-                        </div>
-                        <div class="form-group col-lg-3">
-                            <label for="perClientInput">Per Client Limit (max. servers per client using this plan) (Optional)</label>
-                            <input type="number" name="per_client_limit" value="{{ $plan->per_client_limit }}" class="form-control" id="perClientInput" placeholder="0 = No servers can be created">
-                        </div>
-                        <div class="form-group col-lg-3">
-                            <label for="perClientTrialInput">Per Client Trial Limit (max. free trials per client using this plan) (Optional)</label>
-                            <input type="number" name="per_client_trial_limit" value="{{ $plan->per_client_trial_limit }}" class="form-control" id="perClientTrialInput" placeholder="0 = No free trials allowed">
+                            </div>
+                            <div class="form-group col-lg-6">
+                                <label for="daysSuspendInput">Days before server suspension </label>
+                                <input type="number" name="days_before_suspend" value="{{ $plan->days_before_suspend }}" class="form-control" id="daysSuspendInput" placeholder="0 = Instantly suspended when overdue">
+                            </div>
+                            <div class="form-group col-lg-6">
+                                <label for="daysSuspendInput">Days before server deletion</label>
+                                <input type="number" name="days_before_delete" value="{{ $plan->days_before_delete }}" class="form-control" id="daysSuspendInput" placeholder="0 = Instantly deleted when overdue">
+                            </div>
+                            <div class="form-group col-lg-4">
+                                <label for="globalLimitInput">Global Limit (Optional)</label>
+                                <input type="number" name="global_limit" value="{{ $plan->global_limit }}" class="form-control" id="globalLimitInput" placeholder="0 = No servers can be created">
+                            </div>
+                            <div class="form-group col-lg-4">
+                                <label for="perClientInput">Per Client Limit (Optional)</label>
+                                <input type="number" name="per_client_limit" value="{{ $plan->per_client_limit }}" class="form-control" id="perClientInput" placeholder="0 = No servers can be created">
+                            </div>
+                            <div class="form-group col-lg-4">
+                                <label for="perClientTrialInput">Per Client Trial Limit (Optional)</label>
+                                <input type="number" name="per_client_trial_limit" value="{{ $plan->per_client_trial_limit }}" class="form-control" id="perClientTrialInput" placeholder="0 = No free trials allowed">
+                            </div>
                         </div>
                         @php $plan_cycles = $plan_cycle_model->where('plan_id', $id)->get() @endphp
                         <div class="form-group col-lg-12">
@@ -166,7 +184,7 @@
                             <input type="text" name="cycle[0][init_price]" value="{{ $plan_cycles[0]->init_price }}" class="form-control" placeholder="Use default currency" required>
                         </div>
                         <div class="form-group col-lg-3">
-                            <label>Renew Price</label>
+                            <label>Renewal Price</label>
                             <input type="text" name="cycle[0][renew_price]" value="{{ $plan_cycles[0]->renew_price }}" class="form-control" placeholder="Use default currency" required>
                         </div>
                         <div class="form-group col-lg-3">
@@ -193,57 +211,69 @@
                         </div>
                         <div class="form-group col-lg-12">
                             <hr>
-                            <h5>Additional Billing Cycles (Optional)</h5>
+                            <h5>Additional Billing Cycles</h5>
+                            <button type="button" class="btn btn-primary btn-sm" id="add-cycle"><i class="fas fa-plus"></i> Add Billing Cycle</button>
                         </div>
-                        @for ($i = 1; $i <= 8; $i++)
-                            <div class="form-group col-lg-3">
-                                <label>Cycle Length</label>
-                                <input type="number" name="cycle[{{$i}}][cycle_length]" @if ($plan_cycles->count() >= $i + 1) value="{{ $plan_cycles[$i]->cycle_length }}" @endif class="form-control" placeholder="e.g. Quarterly: enter '3', choose 'Monthly'">
+                        <div class="col-lg-12 row" id="additional-cycles">
+                            @php $i = 0; @endphp
+
+                            @foreach ($plan_cycles as $plan_cycle)
+                                @if ($i == 0) @php $i++; @endphp @continue @endif
+
+                            <div class="row col-12">
+                                <div class="form-group col-lg-3">
+                                    <label>Cycle Length</label>
+                                    <input type="number" name="cycle[{{$i}}][cycle_length]" value="{{ $plan_cycle->cycle_length }}" class="form-control" placeholder="e.g. enter '3', choose 'Monthly'">
+                                </div>
+                                <div class="form-group col-lg-3">
+                                    <label>Cycle Type</label>
+                                    <select class="form-control" name="cycle[{{$i}}][cycle_type]">
+                                        <option value="0" @if ($plan_cycle->cycle_type === 0) selected @endif>One-time</option>
+                                        <option value="1" @if ($plan_cycle->cycle_type === 1) selected @endif>Hourly</option>
+                                        <option value="2" @if ($plan_cycle->cycle_type === 2) selected @endif>Daily</option>
+                                        <option value="3" @if ($plan_cycle->cycle_type === 3) selected @endif>Monthly</option>
+                                        <option value="4" @if ($plan_cycle->cycle_type === 4) selected @endif>Yearly</option>
+                                    </select>
+                                </div>
+                                <div class="form-group col-lg-3">
+                                    <label>Initial Price</label>
+                                    <input type="text" name="cycle[{{$i}}][init_price]" value="{{ $plan_cycle->init_price }}" class="form-control" placeholder="Use default currency">
+                                </div>
+                                <div class="form-group col-lg-3">
+                                    <label>Renewal Price</label>
+                                    <input type="text" name="cycle[{{$i}}][renew_price]" value="{{ $plan_cycle->renew_price }}" class="form-control" placeholder="Use default currency">
+                                </div>
+                                <div class="form-group col-lg-3">
+                                    <label>Setup fee</label>
+                                    <input type="text" name="cycle[{{$i}}][setup_fee]" value="{{ $plan_cycle->setup_fee }}" class="form-control" placeholder="Use default currency">
+                                </div>
+                                <div class="form-group col-lg-3">
+                                    <label>Late fee</label>
+                                    <input type="text" name="cycle[{{$i}}][late_fee]" value="{{ $plan_cycle->late_fee }}" class="form-control" placeholder="Use default currency">
+                                </div>
+                                <div class="form-group col-lg-3">
+                                    <label>Trial Length (Optional)</label>
+                                    <input type="number" name="cycle[{{$i}}][trial_length]" value="{{ $plan_cycle->trial_length }}" min="0" class="form-control" placeholder="e.g. enter '7', choose 'Days'">
+                                </div>
+                                <div class="form-group col-lg-3">
+                                    <label>Trial Type (Optional)</label>
+                                    <select class="form-control" name="cycle[{{$i}}][trial_type]">
+                                        <option></option>
+                                        <option value="1" @if ($plan_cycle->trial_type === 1) selected @endif>Hour(s)</option>
+                                        <option value="2" @if ($plan_cycle->trial_type === 2) selected @endif>Day(s)</option>
+                                        <option value="3" @if ($plan_cycle->trial_type === 3) selected @endif>Month(s)</option>
+                                        <option value="4" @if ($plan_cycle->trial_type === 4) selected @endif>Year(s)</option>
+                                    </select>
+                                </div>
+                                <div class="form-group col-lg-12">
+                                    <button type="button" class="btn btn-danger btn-sm" onclick="return this.parentNode.parentNode.remove()"><i class="fas fa-trash"></i></button>
+                                    <hr>
+                                </div>
                             </div>
-                            <div class="form-group col-lg-3">
-                                <label>Cycle Type</label>
-                                <select class="form-control" name="cycle[{{$i}}][cycle_type]">
-                                    <option value="0" @if ($plan_cycles->count() >= $i + 1) @if ($plan_cycles[$i]->cycle_type === 0) selected @endif @endif>One-time</option>
-                                    <option value="1" @if ($plan_cycles->count() >= $i + 1) @if ($plan_cycles[$i]->cycle_type === 1) selected @endif @endif>Hourly</option>
-                                    <option value="2" @if ($plan_cycles->count() >= $i + 1) @if ($plan_cycles[$i]->cycle_type === 2) selected @endif @endif>Daily</option>
-                                    <option value="3" @if ($plan_cycles->count() >= $i + 1) @if ($plan_cycles[$i]->cycle_type === 3) selected @endif @endif>Monthly</option>
-                                    <option value="4" @if ($plan_cycles->count() >= $i + 1) @if ($plan_cycles[$i]->cycle_type === 4) selected @endif @endif>Yearly</option>
-                                </select>
-                            </div>
-                            <div class="form-group col-lg-3">
-                                <label>Initial Price</label>
-                                <input type="text" name="cycle[{{$i}}][init_price]" @if ($plan_cycles->count() >= $i + 1) value="{{ $plan_cycles[$i]->init_price }}" @endif class="form-control" placeholder="Use default currency">
-                            </div>
-                            <div class="form-group col-lg-3">
-                                <label>Renew Price</label>
-                                <input type="text" name="cycle[{{$i}}][renew_price]" @if ($plan_cycles->count() >= $i + 1) value="{{ $plan_cycles[$i]->renew_price }}" @endif class="form-control" placeholder="Use default currency">
-                            </div>
-                            <div class="form-group col-lg-3">
-                                <label>Setup fee</label>
-                                <input type="text" name="cycle[{{$i}}][setup_fee]" @if ($plan_cycles->count() >= $i + 1) value="{{ $plan_cycles[$i]->setup_fee }}" @endif class="form-control" placeholder="Use default currency">
-                            </div>
-                            <div class="form-group col-lg-3">
-                                <label>Late fee</label>
-                                <input type="text" name="cycle[{{$i}}][late_fee]" @if ($plan_cycles->count() >= $i + 1) value="{{ $plan_cycles[$i]->late_fee }}" @endif class="form-control" placeholder="Use default currency">
-                            </div>
-                            <div class="form-group col-lg-3">
-                                <label>Trial Length (Optional)</label>
-                                <input type="number" name="cycle[{{$i}}][trial_length]" @if ($plan_cycles->count() >= $i + 1) value="{{ $plan_cycles[$i]->trial_length }}" @endif min="0" class="form-control" placeholder="e.g. 7 Days: enter '7', choose 'Days'">
-                            </div>
-                            <div class="form-group col-lg-3">
-                                <label>Trial Type (Optional)</label>
-                                <select class="form-control" name="cycle[{{$i}}][trial_type]">
-                                    <option></option>
-                                    <option value="1" @if ($plan_cycles->count() >= $i + 1) @if ($plan_cycles[$i]->trial_type === 1) selected @endif @endif>Hour(s)</option>
-                                    <option value="2" @if ($plan_cycles->count() >= $i + 1) @if ($plan_cycles[$i]->trial_type === 2) selected @endif @endif>Day(s)</option>
-                                    <option value="3" @if ($plan_cycles->count() >= $i + 1) @if ($plan_cycles[$i]->trial_type === 3) selected @endif @endif>Month(s)</option>
-                                    <option value="4" @if ($plan_cycles->count() >= $i + 1) @if ($plan_cycles[$i]->trial_type === 4) selected @endif @endif>Year(s)</option>
-                                </select>
-                            </div>
-                            <div class="form-group col-lg-12">
-                                <hr>
-                            </div>
-                        @endfor
+
+                                @php $i++; @endphp
+                            @endforeach
+                        </div>
                     </div>
                 </form>
                 <form action="{{ route('api.admin.plan.delete', ['id' => $id]) }}" method="DELETE" data-callback="deleteForm" id="deleteForm"></form>
@@ -286,5 +316,64 @@
                 wentWrong()
             }
         }
+
+        var i = {{ $i }}
+
+        $(document).on('click', '#add-cycle', function() {
+            $('#additional-cycles').append(`
+                <div class="row col-12">
+                    <div class="form-group col-lg-3">
+                        <label>Cycle Length</label>
+                        <input type="number" name="cycle[${i}][cycle_length]" class="form-control" placeholder="e.g. enter '3', choose 'Monthly'">
+                    </div>
+                    <div class="form-group col-lg-3">
+                        <label>Cycle Type</label>
+                        <select class="form-control" name="cycle[${i}][cycle_type]">
+                            <option value="0">One-time</option>
+                            <option value="1">Hourly</option>
+                            <option value="2">Daily</option>
+                            <option value="3">Monthly</option>
+                            <option value="4">Yearly</option>
+                        </select>
+                    </div>
+                    <div class="form-group col-lg-3">
+                        <label>Initial Price</label>
+                        <input type="text" name="cycle[${i}][init_price]" class="form-control" placeholder="Use default currency">
+                    </div>
+                    <div class="form-group col-lg-3">
+                        <label>Renewal Price</label>
+                        <input type="text" name="cycle[${i}][renew_price]" class="form-control" placeholder="Use default currency">
+                    </div>
+                    <div class="form-group col-lg-3">
+                        <label>Setup fee</label>
+                        <input type="text" name="cycle[${i}][setup_fee]" class="form-control" placeholder="Use default currency">
+                    </div>
+                    <div class="form-group col-lg-3">
+                        <label>Late fee</label>
+                        <input type="text" name="cycle[${i}][late_fee]" class="form-control" placeholder="Use default currency">
+                    </div>
+                    <div class="form-group col-lg-3">
+                        <label>Trial Length (Optional)</label>
+                        <input type="number" name="cycle[${i}][trial_length]" min="0" class="form-control" placeholder="e.g. enter '7', choose 'Days'">
+                    </div>
+                    <div class="form-group col-lg-3">
+                        <label>Trial Type (Optional)</label>
+                        <select class="form-control" name="cycle[${i}][trial_type]">
+                            <option></option>
+                            <option value="1">Hour(s)</option>
+                            <option value="2">Day(s)</option>
+                            <option value="3">Month(s)</option>
+                            <option value="4">Year(s)</option>
+                        </select>
+                    </div>
+                    <div class="form-group col-lg-12">
+                        <button type="button" class="btn btn-danger btn-sm" onclick="return this.parentNode.parentNode.remove()"><i class="fas fa-trash"></i></button>
+                        <hr>
+                    </div>
+                </div>
+            `)
+
+            i++
+        })
     </script>
 @endsection

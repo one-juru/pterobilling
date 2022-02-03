@@ -38,12 +38,15 @@ class StoreController extends Controller
 
     public function order($id)
     {
-        return view('store.order', ['id' => $id]);
+        return view('store.order', ['id' => $id, 'plan' => Plan::find($id)]);
     }
 
     public function checkout($id)
     {
-        return view('store.checkout', ['id' => $id]);
+        if (!session()->has("order_server_$id"))
+            return redirect()->route('order', ['id' => $id]);
+        
+        return view('store.checkout', ['id' => $id, 'plan' => Plan::find($id)]);
     }
 
     public function kb($id = null)

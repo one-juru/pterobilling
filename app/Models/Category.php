@@ -15,7 +15,7 @@ class Category extends Model
         'order',
     ];
 
-    public static function verifyCategory(Category $category, Client $client = null)
+    public static function verifyCategory(self $category, Client $client = null)
     {
         if ($client && $category->per_client_limit) {
             $servers = 0;
@@ -36,7 +36,7 @@ class Category extends Model
         return $servers < $category->global_limit;
     }
 
-    public static function verifyCategoryTrial(Category $category, Client $client)
+    public static function verifyCategoryTrial(self $category, Client $client)
     {
         if (is_null($category->per_client_trial_limit)) return true;
 

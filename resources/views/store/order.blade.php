@@ -1,90 +1,133 @@
+@php $header_route = "plans"; @endphp
+
 @extends('layouts.store')
 
+@inject('plan_model', 'App\Models\Plan')
+@inject('plan_cycle_model', 'App\Models\PlanCycle')
 @inject('category_model', 'App\Models\Category')
 @inject('addon_model', 'App\Models\Addon')
+@inject('addon_cycle_model', 'App\Models\AddonCycle')
+@inject('discount_model', 'App\Models\Discount')
 
-@php
-    $plan->price = number_format($plan->price * session('currency')->rate * $percent_off, 2);
-    $plan->setup_fee = number_format($plan->setup_fee * session('currency')->rate * $percent_off, 2);
-@endphp
+@section('title', $plan->name)
+@section('header', 'Server Plans')
 
 @section('content')
     <div class="row">
         <div class="col-lg-9">
             <div class="card">
                 <div class="card-body">
-                    <h5 class="card-title">{{ $plan->name }} - <i>{{ $category_model->find($plan->category_id)->value('name') }}</i></h5>
+                    <h5 class="card-title"><i>{{ $category_model->find($plan->category_id)->name }}: {{ $plan->name }}</i></h5>
                     <p class="card-text">
                         <ul>
                             <li>{{ $plan->ram }} GB RAM</li>
                             <li>{{ $plan->cpu }}% CPU</li>
                             <li>{{ $plan->disk }} GB Disk</li>
+                            <li>{{ $plan->databases }} Databases</li>
+                            <li>{{ $plan->backups }} Backups</li>
+                            <li>{{ $plan->extra_ports }} Extra Ports</li>
                         </ul>
                     </p>
-                    <a href="{{ route('plans') }}" class="card-link"><i class="fas fa-arrow-left text-sm"></i> Choose another plan</a>
+                    <a {!! to_page('plans') !!} class="card-link"><i class="fas fa-arrow-left text-sm"></i> Choose another server plan</a>
                 </div>
             </div>
-            <form method="POST" action="" id="orderForm">
+            <form action="{{ route('api.store.order', ['id' => $id]) }}" method="POST" id="order-form" data-callback="orderForm">
                 @csrf
 
-                <input type="hidden" name="order_details" value='{"addons": []}' id="order-details">
                 <div class="form-group row">
-                    <label for="serverNameInput" class="col-lg-3 col-form-label">Server Name</label>
-                    <div class="col-lg-4">
-                        <input type="text" name="server_name" value="{{ old('server_name') }}" class="form-control" id="serverNameInput" placeholder="Server Name" required>
+                    <label for="serverNameInput" class="col-lg-4 col-form-label">Server Name</label>
+                    <div class="col-lg-6">
+                        <input type="text" name="server_name" class="form-control" id="serverNameInput" placeholder="This option can be changed later in the panel">
                     </div>
                 </div>
-                <hr>
                 <div class="form-group row">
-                    <label for="serverIpInput" class="col-lg-3 col-form-label">Server Location</label>
-                    <div class="col-lg-5">
-                        <select class="form-control" name="location">
-                            @if ($locations)
-                                @unless (array_key_exists('errors', $locations))
-                                    @foreach ($locations['data'] as $location_data)
-                                        <option value="{{ $location_data['attributes']['id'] }}">{{ $location_data['attributes']['short'] }}</option>
-                                    @endforeach
-                                @endunless
-                            @endif
-                        </select>
-                    </div>
-                </div>
-                <hr>
-                <div class="form-group row">
-                    <label class="col-lg-3 col-form-label">Add-ons</label>
-                    <div class="col-lg-7">
-                        @foreach ($addon_model->all() as $addon)
-                            @if (in_array($plan->category_id, json_decode($addon->categories, true)))
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" name="addon_{{ $addon->id }}" value="true" onchange="updateAddonSummary({{ $addon }});">
-                                    <p class="form-check-label">{{ $addon->name }} <span class="float-right">{!! session('currency')->symbol !!}{{ number_format($addon->price * session('currency')->rate * $percent_off, 2) }} {{ json_decode($plan->cycles)[0] }} (${{ number_format($addon->setup_fee * session('currency')->rate * $percent_off, 2) }} setup fee)</span></p>
-                                </div>
-                            @endif
-                        @endforeach
-                    </div>
-                </div>
-                <hr>
-                <div class="form-group row">
-                    <label class="col-lg-3 col-form-label">Billing Cycle</label>
-                    <div class="col-lg-3">
-                        <select class="form-control" name="cycle" id="billing-cycle" onchange="updateValues();">
-                            @foreach (json_decode($plan->cycles) as $cycle)
-                                <option value="{{ $cycle }}">{{ ucfirst($cycle) }}</option>
+                    <label class="col-lg-4 col-form-label">Billing Cycle</label>
+                    <div class="col-lg-6">
+                        <select class="form-control" name="cycle" id="billing-cycle" onchange="updatePage($('form').serialize())">
+                            @foreach ($plan_cycle_model->where('plan_id', $id)->get() as $plan_cycle)
+                                @php $plan_percent_off = 1; @endphp
+                                @foreach ($discount_model->getValidDiscounts() as $discount)
+                                    @if ($plan->discount === $discount->id || $discount->is_global)
+                                        @php $plan_percent_off = 1 - ($discount->percent_off / 100); @endphp
+                                        @break
+                                    @endif
+                                @endforeach
+                                <option value="{{ $plan_cycle->id }}">
+                                    {!! price($plan_cycle->init_price * $plan_percent_off) !!}
+                                    / {{ $plan_cycle_model->type_name($plan_cycle->cycle_length, $plan_cycle->cycle_type) }}
+                                    @if ($plan_cycle->setup_fee > 0)
+                                        ({!! session('currency')->symbol !!}{{ $plan_cycle->setup_fee * session('currency')->rate * $plan_percent_off }} Setup)
+                                    @endif
+                                    @unless ($plan_cycle->init_price === $plan_cycle->renew_price || $plan_cycle->cycle_type === 0)
+                                        [ Renew: {!! session('currency')->symbol !!}{{ $plan_cycle->renew_price * session('currency')->rate }} ]
+                                    @endunless
+                                </option>
                             @endforeach
                         </select>
                     </div>
                 </div>
-            </form>
-            <hr>
-            <form method="POST" action="{{ route('order.coupon', ['id' => $id]) }}">
-                @csrf
+                <hr>
                 <div class="form-group row">
-                    <label for="couponCodeInput" class="col-lg-3 col-form-label">Coupon Code</label>
+                    <label class="col-lg-2 col-form-label">Add-ons</label>
+                    <div class="col-lg-9"> <div id="addons"></div> </div>
+                </div>
+                <hr>
+                @php
+                    $pterodactyl_api = new PterodactylSDK\PterodactylAPI;
+                    $nest_api = $pterodactyl_api->nests()->getAll();
+                @endphp
+                <div class="form-group row">
+                    <label class="col-lg-4 col-form-label">Server Nest / Egg</label>
                     <div class="col-lg-4">
-                        <input type="text" name="coupon" value="{{ old('coupon') }}" class="form-control" id="couponCodeInput" placeholder="Coupon Code" required>
+                        <select class="form-control" name="egg">
+                            @if ($nest_api->status() === '200' && empty($nest_api->errors()))
+                                @foreach ($nest_api->response()->data as $nest)
+                                    @php $location_option = false; @endphp
+                                    @foreach ($nest->attributes->relationships->eggs->data as $egg)
+                                        @if (in_array($nest->attributes->id.':'.$egg->attributes->id, json_decode($plan->nests_eggs_id, true)))
+                                            @unless ($location_option)
+                                                <option value="" disabled>{{ $nest->attributes->name }}</option>
+                                                @php $location_option = true; @endphp
+                                            @endunless
+                                            <option value="{{ $nest->attributes->id }}:{{ $egg->attributes->id }}">{{ $egg->attributes->name }}</option>
+                                        @endif
+                                    @endforeach
+                                    @if ($location_option) <option value="" disabled></option> @endif
+                                @endforeach
+                            @endif
+                        </select>
                     </div>
-                    <div class="col-lg-2">
-                        <button type="submit" class="btn btn-primary btn-sm float-left">Apply</button>
+                </div>
+                @php $location_api = $pterodactyl_api->locations()->getAll(); @endphp
+                <div class="form-group row">
+                    <label class="col-lg-4 col-form-label">Server Location / Node</label>
+                    <div class="col-lg-4">
+                        <select class="form-control" name="node">
+                            @if ($location_api->status() === '200' && empty($location_api->errors()))
+                                @foreach ($location_api->response()->data as $location)
+                                    @php $location_option = false; @endphp
+                                    @foreach ($location->attributes->relationships->nodes->data as $node)
+                                        @if (in_array($location->attributes->id.':'.$node->attributes->id, json_decode($plan->locations_nodes_id, true)))
+                                            @unless ($location_option)
+                                                <option disabled>{{ $location->attributes->long }} ({{ $location->attributes->short }})</option>
+                                                @php $location_option = true; @endphp
+                                            @endunless
+                                            <option value="{{ $location->attributes->id }}:{{ $node->attributes->id }}">{{ $node->attributes->name }}</option>
+                                        @endif
+                                    @endforeach
+                                    @if ($location_option) <option value="" disabled></option> @endif
+                                @endforeach
+                            @endif
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label for="couponCodeInput" class="col-lg-4 col-form-label">Coupon Code</label>
+                    <div class="col-lg-4 col-9">
+                        <input type="text" name="coupon" class="form-control" id="couponCodeInput" placeholder="Coupon Code">
+                    </div>
+                    <div class="col-lg-3 col-3">
+                        <button type="button" class="btn btn-primary" onclick="updatePage($('form').serialize())">Apply <i class="fas fa-arrow-circle-right"></i></button>
                     </div>
                 </div>
             </form>
@@ -97,31 +140,24 @@
                 <div class="card-body">
                     <h6>Server <span class="float-right">{{ $plan->name }}</span></h6>
                     <small>
-                        Monthly <span class="float-right">{!! session('currency')->symbol !!}{{ $plan->price }}</span><br>
-                        Setup Fee <span class="float-right">{!! session('currency')->symbol !!}{{ $plan->setup_fee }}</span>
+                        <span id="plan-cycle"></span> <span class="float-right">{!! session('currency')->symbol !!}<span id="plan-init"></span> {{ session('currency')->name }}</span><br>
+                        Setup Fee <span class="float-right">{!! session('currency')->symbol !!}<span id="plan-setup"></span> {{ session('currency')->name }}</span>
                     </small>
                     <hr>
                     <div id="addons-summary"></div>
                     <h6>Subtotal <span class="float-right">{!! session('currency')->symbol !!}<span id="subtotal"></span> {{ session('currency')->name }}</span></h6>
+                    <div id="promotion-summary"></div>
                     <small>
-                        Billed <span id="subtotal-cycle"></span> <span class="float-right">{!! session('currency')->symbol !!}<span id="subtotal-cycle-price"></span> {{ session('currency')->name }}</span><br>
-                        Tax (%) <span class="float-right"></span>
-                    </small><br>
-                    <small>
-                        @if (session('coupon'))
-                            Coupon: {{ session('coupon')->code }} <span class="float-right">- {!! session('currency')->symbol !!}<span id="coupon-discount"></span></span><br>
-                        @endif
-                        @if (auth()->user()->credit > 0)
-                            Account Credit <span class="float-right">- {!! session('currency')->symbol !!}<span id="credit-discount"></span></span>
-                        @endif
+                        <div id="tax-summary"></div>
+                        <div id="credit-summary"></div>
                     </small>
                     <hr>
                     <h6>Due Today <span class="float-right">{!! session('currency')->symbol !!}<span id="due-today"></span> {{ session('currency')->name }}</span></h6>
-                    @if ($plan->trial > 0)
-                        <small class="card-title">Billed after the {{ $plan->trial }}-day free trial</small><br>
+                    @if ($plan_model->verifyPlanTrial($plan, auth()->user()))
+                        <small class="card-title">{{ $plan->trial }}-day free trial</small><br>
                     @endif
-                    <small>Next <span id="next-cycle"></span> <span class="float-right">{!! session('currency')->symbol !!}<span id="next-due"></span> {{ session('currency')->name }}</span></small><br>
-                    <button type="submit" form="orderForm" class="btn btn-primary float-right">Continue <i class="fas fa-arrow-circle-right"></i></button>
+                    <small><div id="next-summary"></div></small><br>
+                    <button type="submit" form="order-form" class="btn btn-primary float-right">Continue <i class="fas fa-arrow-circle-right"></i></button>
                 </div>
             </div>
         </div>
@@ -130,133 +166,183 @@
 
 @section('store_scripts')
     <script>
-        $("form :input").change(function() {
-            const data = $(this).serialize()
-            $.debounce(function() {
-                $.ajax({
-                    'url': {{ route('api.store.order.summary') }},
-                    'data': data,
-                    'headers': {
-                        'Accept': 'application/json; charset=UTF-8',
-                        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                    },
-                    'method': 'GET',
-                    'success': function(data) {
-                        if (data.success) {
-                            
-                        } else if (data.error) {
-                            toastr.error(data.error)
-                        } else {
-                            wentWrong()
-                        }
-                    },
-                    'error': function() { wentWrong() }
-                })
-            }, 500)
-        });
-    </script>
-@endsection
+        const currencyRate = {{ session('currency')->rate }}
+        const addons = document.getElementById("addons")
+        const billingCycle = document.getElementById("billing-cycle")
+        const planCycle = document.getElementById("plan-cycle")
+        const planInit = document.getElementById("plan-init")
+        const planSetup = document.getElementById("plan-setup")
+        const addonsSummary = document.getElementById("addons-summary")
+        const promotionSummary = document.getElementById("promotion-summary")
+        const taxSummary = document.getElementById("tax-summary")
+        const creditSummary = document.getElementById("credit-summary")
+        const subtotal = document.getElementById("subtotal")
+        const couponDiscount = document.getElementById("coupon-discount")
+        const creditDiscount = document.getElementById("credit-discount")
+        const dueToday = document.getElementById("due-today")
+        const nextSummary = document.getElementById("next-summary")
 
-@section('scripts')
-    <script>
-        var orderDetailsInput = document.getElementById("order-details");
-        var billingCycle = document.getElementById("billing-cycle");
-        var addonsDiv = document.getElementById("addons-summary");
-        var subtotalSpan = document.getElementById("subtotal");
-        var subtotalCycleSpan = document.getElementById("subtotal-cycle");
-        var subtotalCyclePriceSpan = document.getElementById("subtotal-cycle-price");
-        var couponDiscountSpan = document.getElementById("coupon-discount");
-        var creditDiscountSpan = document.getElementById("credit-discount");
-        var dueTodaySpan = document.getElementById("due-today");
-        var nextCycle = document.getElementById("next-cycle");
-        var nextDueSpan = document.getElementById("next-due");
+        const taxPercent = {{ session('tax')->percent }}
+        const taxAmount = {{ session('tax')->amount }}
 
-        var checkedAddons = [];
-        var months = 1;
-        var subtotal = {{ $plan->price + $plan->setup_fee }};
-        var currencyRate = {{ session('currency')->rate }};
-        @if (session('coupon'))
-            var couponPercentOff = {{ session('coupon')->percent_off }} / 100;
-        @endif
-        @if (auth()->user()->credit > 0)
-            var accountCredit = {{ auth()->user()->credit }};
-        @endif
+        var last_updated = 0
+        var pending = null
 
-        function updateAddonSummary(addon) {
-            if (checkedAddons.includes(addon.id)) {
-                document.getElementById(`addon_${addon.id}`).remove();
-                checkedAddons.splice(checkedAddons.indexOf(addon.id), 1);
-                subtotal -= addon.price;
-                dueToday -= addon.price;
-                nextDue -= addon.price;
+        function updatePage(form) {
+            if (pending) {
+                pending = form
+                return
+            }
+            var mills = Date.now() - last_updated
+            if (mills < 1000 * 2) {
+                pending = form
+                setTimeout(function() {
+                    last_updated = Date.now()
+                    pageUpdateAPI(pending)
+                    pending = null
+                }, mills)
             } else {
-                var div = document.createElement("div");
-                div.setAttribute("id", `addon_${addon.id}`);
-                div.innerHTML = `
-                    <h6>Add-on <span class="float-right">${addon.name}</span></h6>
-                    <small>
-                        Monthly <span class="float-right">$${addon.price}</span><br>
-                        Setup Fee <span class="float-right">$${addon.setup_fee}</span>
-                    </small>
-                    <hr>
-                `;
-                addonsDiv.appendChild(div);
-                checkedAddons.push(addon.id);
-                subtotal += +addon.price;
+                last_updated = Date.now()
+                pageUpdateAPI(form)
             }
-            
-            updateValues();
         }
 
-        function updateValues() {
-            switch (billingCycle.value) {
-                case 'monthly':
-                    subtotalCycleSpan.innerHTML = `Monthly`;
-                    nextCycle.innerHTML = `Month`;
-                    months = 1;
-                    break;
-                case 'trimonthly':
-                    subtotalCycleSpan.innerHTML = `Trimonthly`;
-                    nextCycle.innerHTML = `3 Months`;
-                    months = 3;
-                    break;
-                case 'biannually':
-                    subtotalCycleSpan.innerHTML = `Biannually`;
-                    nextCycle.innerHTML = `6 Months`;
-                    months = 6;
-                    break;
-                case 'annually':
-                    subtotalCycleSpan.innerHTML = `Yearly`;
-                    nextCycle.innerHTML = `Year`;
-                    months = 12;
-                    break;
-            }
+        function pageUpdateAPI(form) {
+            $.ajax({
+                'url': '{{ route('api.store.order.summary', ['id' => $id]) }}',
+                'data': form,
+                'headers': {
+                    'Accept': 'application/json; charset=UTF-8',
+                    'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                },
+                'method': 'POST',
+                'success': function(data) {
+                    if (data.success) {
+                        addons.innerHTML = addonsSummary.innerHTML = ''
+                        if (data.success.addons.length > 0) {
+                            data.success.addons.forEach(addon => {
+                                addon_html = `
+                                    <div class="form-group">
+                                        <label for="addon-${addon[0].id}-range">${addon[0].name}</label>
+                                        <span class="float-right">{!! session('currency')->symbol !!}${addon[1].init_price * currencyRate} {{ session('currency')->name }} / ${data.success.cycle.name}
+                                `
+                                if (addon[1].setup_fee > 0) addon_html += ` ({!! session('currency')->symbol !!}${addon[1].setup_fee * currencyRate} Setup)`
+                                if (addon[1].renew_price > 0 && data.success.cycle.data.cycle_type > 0) addon_html += ` [ Renew: {!! session('currency')->symbol !!}${addon[1].renew_price * currencyRate} ]`
+                                addon_html += `
+                                        </span>
+                                        <input type="text" name="addon[${addon[0].id}]" value="" id="addon-${addon[0].id}-range" onchange="updatePage($('form').serialize())">
+                                        <small>${addon[0].description}</small>
+                                    </div>
+                                `
+                                addons.innerHTML += addon_html
 
-            subtotalCyclePrice = dueToday = nextDue = subtotal * months;
+                                if (addon[2] > 0) {
+                                    const div = document.createElement("div")
+                                    div.setAttribute("id", `addon_${addon.id}`)
+                                    div.innerHTML = `
+                                        <h6>Add-on <span class="float-right">${addon[2]} x ${addon[0].name}</span></h6>
+                                        <small>
+                                            ${data.success.cycle.name} <span class="float-right">$${addon[1].init_price * currencyRate * addon[2]}</span><br>
+                                            Setup Fee <span class="float-right">$${addon[1].setup_fee * currencyRate * addon[2]}</span>
+                                        </small>
+                                        <hr>
+                                    `;
+                                    addonsSummary.appendChild(div)
+                                }
 
-            if (couponDiscountSpan && couponPercentOff) {
-                couponDiscountSpan.innerHTML = (dueToday * couponPercentOff).toFixed(2);
-                dueToday = dueToday * (1 - couponPercentOff);
-            }
+                                $(function () {
+                                    $(`#addon-${addon[0].id}-range`).ionRangeSlider({
+                                        min     : 0,
+                                        max     : addon[0].resource == 'dedicated_ip' ? 1 : (addon[0].per_server_limit ? addon[0].per_server_limit : 500),
+                                        type    : 'single',
+                                        step    : 1,
+                                        from    : addon[2],
+                                        prettify: false,
+                                        hasGrid : true
+                                    })
+                                })
+                            })
+                        } else {
+                            addons.innerHTML = '<label>No add-ons are available for this server plan or billing cycle.</label>'
+                        }
+                        
+                        planCycle.innerHTML = data.success.cycle.name
+                        planInit.innerHTML = data.success.cycle.data.init_price * currencyRate
+                        planSetup.innerHTML = data.success.cycle.data.setup_fee * currencyRate
+                        subtotal.innerHTML = data.success.subtotal * currencyRate
+                        dueToday.innerHTML = data.success.summary.due_today * currencyRate
 
-            if (creditDiscountSpan && accountCredit) {
-                if (dueToday > accountCredit) {
-                    creditDiscountSpan.innerHTML = accountCredit.toFixed(2);
-                    dueToday -= accountCredit;
-                } else {
-                    creditDiscountSpan.innerHTML = dueToday.toFixed(2);
-                    dueToday = 0.00;
-                }
-            }
+                        if (data.success.discount) {
+                            promotionSummary.innerHTML = `
+                                <hr>
+                                <h6>
+                                    Discount <span class="float-right">-{!! session('currency')->symbol !!}${data.success.promotion_off * currencyRate} {{ session('currency')->name }}</span>
+                                </h6>
+                                <small>
+                                    ${data.success.discount.name} <span class="float-right">${data.success.discount.percent_off}% Off</span><br>
+                                </small>
+                                <hr>
+                            `
+                        } else if (data.success.coupon) {
+                            const onetime = data.success.coupon.one_time ? ' [One-time]' : ''
+                            promotionSummary.innerHTML = `
+                                <hr>
+                                <h6>
+                                    Coupon <span class="float-right">-{!! session('currency')->symbol !!}${data.success.promotion_off * currencyRate} {{ session('currency')->name }}</span>
+                                </h6>
+                                <small>
+                                    ${data.success.coupon.code}${onetime} <span class="float-right">${data.success.coupon.percent_off}% Off</span><br>
+                                </small>
+                                <hr>
+                            `    
+                        }
+                        
+                        if (taxPercent > 0 || taxAmount > 0) {
+                            var taxVar = taxPercent > 0 ? `${taxPercent}%` : `{!! session('currency')->symbol !!}${taxAmount * currencyRate} {{ session('currency')->name }}`
+                            taxSummary.innerHTML = `
+                                Tax <span class="float-right">+${taxVar}</span><br>
+                            `
+                        }
+                        
+                        if (data.success.credit > 0) {
+                            creditSummary.innerHTML = `
+                                Credit <span class="float-right">{!! session('currency')->symbol !!}${data.success.credit * currencyRate} {{ session('currency')->name }}</span>
+                            `
+                        }
 
-            subtotalSpan.innerHTML = subtotal.toFixed(2);
-            subtotalCyclePriceSpan.innerHTML = subtotalCyclePrice.toFixed(2);
-            dueTodaySpan.innerHTML = dueToday.toFixed(2);
-            nextDueSpan.innerHTML = nextDue.toFixed(2);
-            orderDetailsInput.value = JSON.stringify({"addons": checkedAddons});
+                        if (data.success.cycle.data.cycle_type > 0) {
+                            nextSummary.innerHTML = `Next ${data.success.cycle.name} <span class="float-right">{!! session('currency')->symbol !!}${data.success.summary.due_next * currencyRate} {{ session('currency')->name }}</span>`
+                        }
+                    } else if (data.error) {
+                        toastr.error(data.error)
+                    } else if (data.errors) {
+                        data.errors.forEach(error => { toastr.error(error) });
+                    } else {
+                        wentWrong()
+                    }
+                },
+                'error': function() { wentWrong() }
+            })
         }
-        
-        updateValues();
+
+        function orderForm(data) {
+            if (data.success) {
+                toastr.success(data.success)
+                waitRedirect('{{ route('checkout', ['id' => $id]) }}')
+            } else if (data.error) {
+                toastr.error(data.error)
+            } else if (data.errors) {
+                data.errors.forEach(error => { toastr.error(error) })
+            } else {
+                wentWrong()
+            }
+        }
+
+        $(function() { updatePage($('form').serialize()) })
     </script>
+
+    <!-- Ion Slider -->
+    <script>lazyLoadCss('/plugins/ion-rangeslider/css/ion.rangeSlider.min.css')</script>
+    <script src="/plugins/ion-rangeslider/js/ion.rangeSlider.min.js"></script>
 @endsection

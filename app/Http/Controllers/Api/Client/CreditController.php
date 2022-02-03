@@ -2,10 +2,35 @@
 
 namespace App\Http\Controllers\Api\Client;
 
-use App\Http\Controllers\Controller;
+use App\Http\Controllers\Api\ApiController;
+use App\Jobs\IssueCreditInvoice;
+use App\Models\Invoice;
+use App\Models\Tax;
+use Extensions\ExtensionManager;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 
-class CreditController extends Controller
+class CreditController extends ApiController
 {
-    //
+    public function add(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'credit' => 'required|numeric|gt:0',
+            'gateway' => 'required|string',
+        ]);
+
+        if ($validator->fails())
+            return $this->respondJson(['errors' => $validator->errors()->all()]);
+
+        if (is_null($extension = ExtensionManager::getExtension($request->input('gateway'))))
+            return $this->respondJson(['error' => 'The payment gateway is invalid!']);
+
+        IssueCreditInvoice::dispatchSync($id = $request->user()->id, $credit = $request->input('credit'), $extension::$display_name);
+
+        session(['payment_invoice' => $invoice = Invoice::where('client_id', $id)->where('credit_amount', $credit)->latest()->first()]);
+
+        return $this->respondJson(['info' => 'You\'re being redirected to a third-party payment gateway...',
+            'url' => $extension::checkout($invoice, $credit, route('client.credit.show')),
+        ]);
+    }
 }

@@ -8,55 +8,85 @@ class ExtensionManager
      * The extensions that manage custom payment gateways.
      */
     public static $gateways = [
-        //\Extensions\Gateways\PayPal\Controller::class,
+        \Extensions\Gateways\PayPal\Controller::class,
     ];
 
     /**
      * The extensions that manage server subdomain names.
      */
     public static $subdomains = [
-        //\Extensions\Subdomains\Cloudflare\Controller::class,
+        \Extensions\Subdomains\Cloudflare\Controller::class,
     ];
 
     /**
      * The extensions that upload custom softwares to servers.
      */
     public static $softwares = [
-        //\Extensions\Softwares\Minecraft\Controller::class,
+        \Extensions\Softwares\Minecraft\Controller::class,
     ];
 
     /**
      * The extensions that manage client registrations and/or logins.
      */
-    public static $auth = [];
+    public static $auth = [
+    ];
 
     /**
      * The extensions that manage custom email notifications.
      */
-    public static $email = [];
+    public static $email = [
+    ];
 
     /**
      * The extensions that are not classified in the above categories.
      */
-    public static $general = [];
+    public static $general = [
+    ];
+
 
     public static function getAllExtensions()
     {
         return array_merge(self::$gateways, self::$subdomains, self::$softwares, self::$auth, self::$email, self::$general);
     }
-
-    public static function getAllConfigs()
+    
+    public static function getAllExtensionsWithSettings()
     {
-        $configs = [];
-        foreach (self::getAllExtensions() as $extension) if (method_exists($extension, 'config')) $configs[$extension::$display_name] = $extension::config();
-        return $configs;
+        return array_merge(self::$gateways, self::$subdomains, self::$auth, self::$email);
     }
 
-    public static function getAllViews()
+    public static function getExtension($id)
     {
-        $views = [];
-        foreach (self::getAllExtensions() as $extension) if (method_exists($extension, 'view')) array_push($views, $extension::view());
-        return $views;
+        foreach (self::getAllExtensions() as $extension) if ($extension::$display_name == $id) return $extension;
+    }
+
+    public static function getGatewayExtension($id)
+    {
+        foreach (self::$gateways as $extension) if ($extension::$display_name == $id) return $extension;
+    }
+
+    public static function getSubdomainExtension($id)
+    {
+        foreach (self::$subdomains as $extension) if ($extension::$display_name == $id) return $extension;
+    }
+
+    public static function getSoftwareExtension($id)
+    {
+        foreach (self::$softwares as $extension) if ($extension::$display_name == $id) return $extension;
+    }
+
+    public static function getAuthExtension($id)
+    {
+        foreach (self::$auth as $extension) if ($extension::$display_name == $id) return $extension;
+    }
+
+    public static function getEmailExtension($id)
+    {
+        foreach (self::$email as $extension) if ($extension::$display_name == $id) return $extension;
+    }
+
+    public static function getGeneralExtension($id)
+    {
+        foreach (self::$general as $extension) if ($extension::$display_name == $id) return $extension;
     }
 
     public static function getAllSeeders()
@@ -66,15 +96,8 @@ class ExtensionManager
         return $seeders;
     }
 
-    public static function getAllRoutes()
+    public static function fetchAllRoutes()
     {
-        $routes = [];
-        foreach (self::getAllExtensions() as $extension) if (property_exists($extension, 'routes')) array_push($routes, $extension::$routes);
-        return $routes;
-    }
-
-    public static function getViewPath($path)
-    {
-        return realpath(base_path('extensions/' . $path));
+        foreach (self::getAllExtensions() as $extension) if (method_exists($extension, 'routes')) $extension::routes();
     }
 }

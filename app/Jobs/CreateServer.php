@@ -25,28 +25,15 @@ class CreateServer implements ShouldQueue
      * @var \App\Models\Server
      */
     protected $server;
-    
-    protected $name;
-    protected $nodes;
-    protected $min_port;
-    protected $nest_id;
-    protected $egg_id;
-    protected $allocation_id;
-    protected $pages;
 
     /**
      * Create a new job instance.
      *
      * @return void
      */
-    public function __construct( Server $server, string $name, int $user_id, int $nest_id, int $egg_id, array $nodes, int $min_port)
+    public function __construct(Server $server)
     {
         $this->server = $server;
-        $this->name = $name;
-        $this->nodes = $nodes;
-        $this->min_port = $min_port;
-        $this->nest_id = $nest_id;
-        $this->egg_id = $egg_id;
     }
 
     /**
@@ -57,27 +44,47 @@ class CreateServer implements ShouldQueue
     public function handle()
     {
         $pterodactyl_api = new PterodactylAPI;
+        $plan = Plan::find($this->server->plan_id);
+        
+        $cpu = $plan->cpu;
+        $ram = $plan->ram;
+        $swap = $plan->swap;
+        $disk = $plan->disk;
+        $io = $plan->io;
+        $databases = $plan->databases;
+        $backups = $plan->backups;
+        $extra_ports = $plan->extra_ports;
+        $dedi_ip = null;
 
-        $this->pages = 1;
-
-        foreach ($this->nodes as $node) {
-            $this->getAllocationId($pterodactyl_api, $node);
-            
-            if ($this->allocation_id) {
-                break;
-            } else {
-                for ($p=2; $p <= $this->pages; $p++) { 
-                    $this->getAllocationId($pterodactyl_api, $node, $p);
-                    if ($this->allocation_id) break;
-                }
+        foreach (ServerAddon::where('server_id', $this->server->id) as $server_addon) {
+            switch (($addon = Addon::find($server_addon->addon_id))->resource) {
+                case 'ram':
+                    $ram += $addon->amount * $server_addon->value;
+                    break;
+                case 'cpu':
+                    $cpu += $addon->amount * $server_addon->value;
+                    break;
+                case 'disk':
+                    $disk += $addon->amount * $server_addon->value;
+                    break;
+                case 'database':
+                    $databases += $addon->amount * $server_addon->value;
+                    break;
+                case 'backup':
+                    $backups += $addon->amount * $server_addon->value;
+                    break;
+                case 'extra_port':
+                    $extra_ports += $addon->amount * $server_addon->value;
+                    break;
+                case 'dedicated_ip':
+                    $dedi_ip = $server_addon->value;
+                    break;
             }
         }
-
-        if ($this->allocation_id == null) return $this->fail();
         
-        $egg_api = $pterodactyl_api->nests()->eggsGet($this->nest_id, $this->egg_id);
-        
+        $egg_api = $pterodactyl_api->nests()->eggsGet($this->server->nest_id, $this->server->egg_id);
         $egg = [];
+
         if ($egg_api->status() != '200' || !empty($egg_api->errors())) {
             Log::error("An error occurred while getting egg details!");
 
@@ -87,55 +94,51 @@ class CreateServer implements ShouldQueue
 
             return $this->fail();
         } else {
-            $egg['docker_image'] = $egg_api->response()->attributes->docker_image;
-            $egg['startup'] = $egg_api->response()->attributes->startup;
+            $egg['docker_image'] = ($egg_res = $egg_api->response())->attributes->docker_image;
+            $egg['startup'] = $egg_res->attributes->startup;
             $egg['environment'] = [];
-            
-            foreach ($egg_api->response()->attributes->relationships->variables->data as $key => $value) {
-                $egg['environment'][$key] = $value;
-            }
-        }
-        
-        $plan = Plan::find($this->server->plan_id);
-        $cpu = $plan->cpu;
-        $ram = $plan->ram;
-        $swap = $plan->swap;
-        $disk = $plan->disk;
-        $io = $plan->io;
-        $databases = $plan->databases;
-        $backups = $plan->backups;
-        $extra_ports = $plan->extra_ports;
 
-        foreach (ServerAddon::where('server_id', $this->server->id) as $server_addon) {
-            switch (($addon = Addon::find($server_addon->addon_id))->resource) {
-                case 'ram':
-                    $ram += $addon->amount * $server_addon->quantity;
-                    break;
-                case 'cpu':
-                    $cpu += $addon->amount * $server_addon->quantity;
-                    break;
-                case 'disk':
-                    $disk += $addon->amount * $server_addon->quantity;
-                    break;
-                case 'database':
-                    $databases += $addon->amount * $server_addon->quantity;
-                    break;
-                case 'backup':
-                    $backups += $addon->amount * $server_addon->quantity;
-                    break;
-                case 'extra_port':
-                    $extra_ports += $addon->amount * $server_addon->quantity;
-                    break;
-                case 'dedicated_ip':
-                    $this->allocation_id = $addon->amount;
-                    break;
+            foreach ($egg_res->attributes->relationships->variables->data as $var) {
+                $egg['environment'][$var->attributes->env_variable] = $var->attributes->default_value;
             }
         }
+
+        $ips = Addon::dediIpList();
+        $allocation_id = (function () use ($pterodactyl_api, $plan, $dedi_ip, $ips) {
+			$page = $pages = 1;
+			
+			while ($page <= $pages) {
+				$allocation_api = $pterodactyl_api->nodes($page)->allocationsGetAll($this->server->node_id);
+                if ($allocation_api->status() != '200' || !empty($allocation_api->errors())) {
+                    Log::error("An error occurred while getting a node and its allocations!");
+        
+                    foreach ($allocation_api->errors() as $error) {
+                        Log::error($error);
+                    }
+                } else {
+                    $pages = ($allocation_res = $allocation_api->response())->meta->pagination->total_pages;
+                    foreach ($allocation_res->data as $allocation) {
+                        if ($allocation->attributes->assigned) continue;
+                        if ($dedi_ip && $allocation->attributes->ip != $dedi_ip) continue;
+                        if ($plan->min_port && $allocation->attributes->port < $plan->min_port) continue;
+                        if ($plan->max_port && $allocation->attributes->port > $plan->max_port) continue;
+                        if (is_null($dedi_ip) && in_array($allocation->attributes->ip, $ips)) continue;
+                        
+                        return $allocation->attributes->id;
+                    }
+                    $page++;
+                }
+			}
+			
+			return null;
+		})();
+
+        if (is_null($allocation_id)) return $this->fail();
 
         $server_api = $pterodactyl_api->servers()->add([
-            'name' => $this->name,
+            'name' => $this->server->server_name,
             'user' => Client::find($this->server->client_id)->user_id,
-            'egg' => $this->egg_id,
+            'egg' => $this->server->egg_id,
             'docker_image' => $egg['docker_image'],
             'startup' => $egg['startup'],
             'environment' => $egg['environment'],
@@ -152,7 +155,7 @@ class CreateServer implements ShouldQueue
                 'allocations' => $extra_ports + 1,
             ],
             'allocation' => [
-                'default' => $this->allocation_id,
+                'default' => $allocation_id,
             ],
         ]);
 
@@ -166,27 +169,9 @@ class CreateServer implements ShouldQueue
             return $this->fail();
         }
 
+        $this->server->server_id = ($server_attr = $server_api->response()->attributes)->id;
+        $this->server->identifier = $server_attr->identifier;
         $this->server->status = 0;
         $this->server->save();
-    }
-
-    private function getAllocationId(PterodactylAPI $pterodactyl_api, int $node, int $p = null) {
-        $allocation_api = $pterodactyl_api->nodes($p)->allocationsGetAll($node);
-
-        if ($allocation_api->status() != '200' || !empty($allocation_api->errors())) {
-            Log::error("An error occurred while getting a node and its allocations!");
-
-            foreach ($allocation_api->errors() as $error) {
-                Log::error($error);
-            }
-        } else {
-            $this->pages = $allocation_api->response()->meta->pagination->total_pages;
-            foreach ($allocation_api->response()->data as $allocation_obj) {
-                if ($allocation_obj->attributes->port >= $this->min_port) {
-                    $this->allocation_id = $allocation_obj->attributes->id;
-                    break;
-                }
-            }
-        }
     }
 }

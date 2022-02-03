@@ -13,16 +13,16 @@
                 <div class="col-lg-5">
                     <div class="card card-primary">
                         <div class="card-header">
-                            <h3 class="card-title">{{ str_replace('Extensions\\Softwares\\', '', $extension) }}</h3>
+                            <h3 class="card-title">{{ $extension::$display_name }}</h3>
                             <div class="card-tools">
                                 <button type="button" class="btn btn-tool" data-card-widget="collapse"><i class="fas fa-minus"></i></button>
                             </div>
                         </div>
                         <div class="card-body">
                             <div class="form-group">
-                                @foreach ($extension->getSoftwares() as $software => $versions)
+                                @foreach ($extension::softwares() as $software => $versions)
                                     <div class="form-check">
-                                        <input class="form-check-input" type="radio" name="software" value="{{ $extension }}:{{ $software }}">
+                                        <input class="form-check-input" type="radio" name="software" value="{{ $extension::$display_name }}:{{ $software }}">
                                         <label class="form-check-label">{{ $software }}</label>
                                         <select name="version" class="form-control">
                                             @foreach ($versions as $version)

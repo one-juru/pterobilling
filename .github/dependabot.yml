@@ -10,6 +10,8 @@ updates:
     directory: "/"
     schedule:
       interval: "daily"
+    ignore:
+      - dependency-name: "srmklive/paypal"
 
   # Maintain dependencies for npm
   #- package-ecosystem: "npm"

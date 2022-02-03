@@ -10,7 +10,7 @@ class Invoice extends Model
         'client_id',
         'server_id',
         'credit_amount',
-        'tax_id',
+        'total',
         'late_fee',
         'payment_method',
         'due_date',
