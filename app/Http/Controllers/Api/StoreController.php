@@ -150,7 +150,7 @@ class StoreController extends ApiController
             return $this->respondJson(['success' => 'You have activated your free trial successfully! Redirecting...']);
         }
 
-        IssueServerInvoice::dispatchSync($server, $order_data['summary']['due_today']);
+        IssueServerInvoice::dispatchSync($server, $order_data['summary']['due_today'], $order_data['credit']);
 
         $invoice = Invoice::where('server_id', $server->id)->latest()->first();
         if ($order_data['summary']['due_today'] === 0) {

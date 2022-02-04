@@ -31,14 +31,22 @@ class IssueServerInvoice implements ShouldQueue
     protected $total;
 
     /**
+     * The credit amount.
+     *
+     * @var float
+     */
+    protected $credit;
+
+    /**
      * Create a new job instance.
      *
      * @return void
      */
-    public function __construct(Server $server, float $total)
+    public function __construct(Server $server, float $total, float $credit = 0)
     {
         $this->server = $server;
         $this->total = $total;
+        $this->credit = $credit;
     }
 
     /**
@@ -53,6 +61,7 @@ class IssueServerInvoice implements ShouldQueue
             'client_id' => $client->id,
             'server_id' => $this->server->id,
             'total' => $this->total,
+            'credit' => $this->credit,
             'payment_method' => $this->server->payment_method,
             'due_date' => $this->server->due_date,
         ]);

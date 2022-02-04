@@ -115,7 +115,7 @@ class Controller extends ApiController implements Gateway
                     'qty' => 1,
                 ]
             ];
-        } elseif ($invoice->credit_amount) {
+        } elseif ($invoice->credit) {
             $data['items'] = [
                 [
                     'name' => 'Add Fund',

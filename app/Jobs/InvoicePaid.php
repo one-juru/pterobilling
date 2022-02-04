@@ -8,7 +8,6 @@ use App\Models\Currency;
 use App\Models\Income;
 use App\Models\Invoice;
 use App\Models\Server;
-use App\Models\Tax;
 use App\Notifications\InvoicePaidNotif;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -59,39 +58,32 @@ class InvoicePaid implements ShouldQueue
                 UpdateServer::dispatch($server)->onQueue('high');
             }
 
-            $total = $this->invoice->total;
-            if (($credit = $client->credit) > 0) {
-                if ($this->invoice->total - $credit < 0) {
-                    $credit = $this->invoice->total;
-                    $total = 0;
-                } else {
-                    $total -= $credit;
-                }
-
-                $client->credit -= $credit;
+            if ($this->invoice->credit > 0) {
+                $client->credit -= $this->invoice->credit;
                 $client->save();
 
                 Credit::create([
                     'client_id' => $client->id,
                     'details' => 'Invoice #'.$this->invoice->id,
-                    'change' => -$credit,
+                    'change' => -$this->invoice->credit,
                     'balance' => $client->credit,
                 ]);
             } 
 
-            Income::create([
-                'item' => 'Server #'.$server->id,
-                'price' => $total,
-                'client_id' => $client->id,
-            ]);
-        } elseif ($this->invoice->credit_amount) {
-            $client->credit += $this->invoice->credit_amount;
+            if ($this->invoice->total > 0)
+                Income::create([
+                    'item' => 'Server #'.$server->id,
+                    'price' => $this->invoice->total,
+                    'client_id' => $client->id,
+                ]);
+        } elseif ($this->invoice->credit) {
+            $client->credit += $this->invoice->credit;
             $client->save();
 
             Credit::create([
                 'client_id' => $client->id,
                 'details' => 'Invoice #'.$this->invoice->id,
-                'change' => $this->invoice->credit_amount,
+                'change' => $this->invoice->credit,
                 'balance' => $client->credit,
             ]);
 
