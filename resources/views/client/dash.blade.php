@@ -166,19 +166,17 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach ($invoice_model->where(['client_id' => auth()->user()->id, 'paid' => false])->get() as $invoice)
+                            @foreach ($invoice_model->where('client_id', auth()->user()->id)->where('paid', false)->get() as $invoice)
                                 <tr>
                                     <td><a href="{{ route('client.invoice.index', ['id' => $invoice->id]) }}">{{ $invoice->id }}</a></td>
                                     <td>
                                         @if ($invoice->server_id)
-                                            @php $total = $server_model::getTotalCost($server_model->find($invoice->server_id)); @endphp
                                             Server #{{ $invoice->server_id }}
-                                        @elseif ($invoice->credit_amount)
-                                            @php $total = $invoice->credit_amount; @endphp
-                                            {!! session('currency')->symbol !!}{{ $invoice->credit_amount * session('currency')->rate }} {{ session('currency')->name }} Credit
+                                        @elseif ($invoice->credit)
+                                            {!! price($invoice->credit) !!} Credit
                                         @endif
                                     </td>
-                                    <td>{!! session('currency')->symbol !!}{{ $tax_model::getAfterTax($total, $invoice->tax_id) * session('currency')->rate }} {{ session('currency')->name }}</td>
+                                    <td>{!! price($invoice->total) !!}</td>
                                     <td>{{ $invoice->due_date }}</td>
                                 </tr>
                             @endforeach
@@ -206,7 +204,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach ($credit_model->where('client_id', auth()->user()->id) as $credit)
+                            @foreach ($credit_model->where('client_id', auth()->user()->id)->latest()->get() as $credit)
                                 <tr>
                                     <td>{{ $credit->id }}</td>
                                     <td>{{ $credit->details }}</td>

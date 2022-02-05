@@ -94,14 +94,14 @@
                         </div>
                     </div>
                     <div class="card-footer row justify-content-center">
-                        <button type="submit" class="btn btn-success btn-sm col-lg-1 col-md-3">Reply</button>
+                        <button type="submit" class="btn btn-success btn-sm col-lg-2 col-3">Reply</button>
                         @if ($ticket->status !== 3)
-                            <button type="submit" name="close" value="true" class="btn btn-danger btn-sm col-lg-1 col-md-3 offset-1">Close</button>
+                            <button type="submit" name="close" value="true" class="btn btn-danger btn-sm col-lg-2 col-3 offset-1">Close</button>
                         @endif
                         @if ($ticket->is_locked)
-                            <button type="submit" name="unlock" value="true" class="btn btn-warning btn-sm col-lg-1 col-md-3 offset-1">Unlock</button>
+                            <button type="submit" name="unlock" value="true" class="btn btn-warning btn-sm col-lg-2 col-3 offset-1">Unlock</button>
                         @else
-                            <button type="submit" name="lock" value="true" class="btn btn-danger btn-sm col-lg-1 col-md-3 offset-1">Lock</button>
+                            <button type="submit" name="lock" value="true" class="btn btn-danger btn-sm col-lg-2 col-3 offset-1">Lock</button>
                         @endif
                     </div>
                 </form>

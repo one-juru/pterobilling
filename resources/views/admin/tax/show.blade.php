@@ -29,8 +29,8 @@
                 </form>
                 <form action="{{ route('api.admin.tax.delete', ['id' => $id]) }}" method="DELETE" data-callback="deleteForm" id="deleteForm"></form>
                 <div class="card-footer col-lg-12 row justify-content-center">
-                    <button type="submit" form="updateForm" class="btn btn-success btn-sm col-lg-2 col-md-4">Save</button>
-                    <button type="submit" form="deleteForm" class="btn btn-danger btn-sm col-lg-2 col-md-4 offset-lg-1 offset-md-2 ">Delete</button>
+                    <button type="submit" form="updateForm" class="btn btn-success btn-sm col-lg-2 col-3">Save</button>
+                    <button type="submit" form="deleteForm" class="btn btn-danger btn-sm col-lg-2 col-3 offset-lg-1 offset-2">Delete</button>
                 </div>
             </div>
         </div>

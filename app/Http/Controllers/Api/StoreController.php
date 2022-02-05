@@ -133,6 +133,7 @@ class StoreController extends ApiController
 
             ServerAddon::create([
                 'addon_id' => $addon[0]->id,
+                'cycle_id' => $addon[1]->id,
                 'server_id' => $server->id,
                 'client_id' => auth()->user()->id,
                 'value' => $value,

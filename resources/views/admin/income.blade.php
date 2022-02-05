@@ -72,7 +72,7 @@
                             <tr>
                                 <td>{{ $income->id }}</a></td>
                                 <td>{{ $client_model->find($income->client_id)->email }}</td>
-                                <td>{{ $income->item }}</td>
+                                <td>{!! $income->item !!}</td>
                                 <td>{!! session('currency')->symbol !!}{{ number_format($income->price * session('currency')->rate, 2) }} {{ session('currency')->name }}</td>
                                 <td>{{ $income->created_at }}</td>
                             </tr>
@@ -94,14 +94,10 @@
 @endsection
 
 @section('admin_scripts')
-    <script> lazyLoadCss('/plugins/datatables-bs4/css/dataTables.bootstrap4.min.css'); </script>
+    <script>lazyLoadCss('/plugins/datatables-bs4/css/dataTables.bootstrap4.min.css')</script>
 
     <script src="/plugins/datatables/jquery.dataTables.min.js"></script>
     <script src="/plugins/datatables-bs4/js/dataTables.bootstrap4.min.js"></script>
 
-    <script>
-        $(function () {
-            $("#income-table").DataTable({"responsive": false, "lengthChange": false, "autoWidth": false});
-        });
-    </script>
+    <script>$(function () { $("#income-table").DataTable({"responsive": false, "lengthChange": false, "autoWidth": false}) })</script>
 @endsection

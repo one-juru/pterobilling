@@ -16,6 +16,7 @@ class CreateServerAddonsTable extends Migration
         Schema::create('server_addons', function (Blueprint $table) {
             $table->id();
             $table->integer('addon_id')->unsigned();
+            $table->integer('cycle_id')->unsigned();
             $table->integer('server_id')->unsigned();
             $table->integer('client_id')->unsigned();
             $table->string('value');

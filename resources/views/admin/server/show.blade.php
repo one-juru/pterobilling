@@ -1,16 +1,21 @@
-@php
-    $header_route = 'admin.servers.active';
-    $plan = $plan_model->find($server->plan_id)->first();
-@endphp
+@php $header_route = 'admin.servers.active'; @endphp
 
 @extends('layouts.admin')
 
 @inject('plan_model', 'App\Models\Plan')
+@inject('plan_cycle_model', 'App\Models\PlanCycle')
 @inject('addon_model', 'App\Models\Addon')
+@inject('addon_cycle_model', 'App\Models\AddonCycle')
+@inject('server_addon_model', 'App\Models\ServerAddon')
 
 @section('title', 'Server Info')
-@section('header', 'Active Servers')
-@section('subheader', "Server #${id}")
+@section('header', 'Servers')
+@section('subheader', "Server #{$id}")
+
+@php
+    $plan = $plan_model->find($server->plan_id)->first();
+    $plan_cycle = $plan_cycle_model->find($server->plan_cycle)->first();
+@endphp
 
 @section('content')
     <div class="row">
@@ -37,12 +42,20 @@
                         @endif
                     </p>
                     @if ($server->status === 2)
-                        <form action="{{ route('admin.server.suspend', ['id' => $server->id]) }}" method="POST">
+                        <form action="{{ route('api.admin.server.unsuspend', ['id' => $server->id]) }}" method="POST" data-callback="suspendForm">
+                            @csrf
                             <button type="submit" class="btn btn-warning btn-sm col-12">Unsuspend Server <i class="fas fa-arrow-circle-right"></i></button>
                         </form>
                     @else
-                        <form action="{{ route('admin.server.unsuspend', ['id' => $server->id]) }}" method="POST">
+                        <form action="{{ route('api.admin.server.suspend', ['id' => $server->id]) }}" method="POST" data-callback="suspendForm">
+                            @csrf
                             <button type="submit" class="btn btn-danger btn-sm col-12">Suspend Server <i class="fas fa-arrow-circle-right"></i></button>
+                        </form>
+                    @endif
+                    @if ($server->status !== 1 && $server->status !== 3)
+                        <form action="{{ route('api.admin.server.delete', ['id' => $server->id]) }}" method="POST" data-callback="deleteForm">
+                            @csrf
+                            <button type="submit" class="btn btn-danger btn-sm col-12 offset-2">Delete/Cancel Server <i class="fas fa-arrow-circle-right"></i></button>
                         </form>
                     @endif
                 </div>
@@ -53,6 +66,7 @@
                 </div>
                 <div class="card-body text-nowrap row">
                     <p class="card-text col-6">
+                        <b>Renew Price</b><br>
                         <b>RAM</b><br>
                         <b>CPU</b><br>
                         <b>Disk</b><br>
@@ -61,12 +75,13 @@
                         <b>Extra Ports</b>
                     </p>
                     <p class="card-text col-6">
+                        {!! price($plan_cycle->renew_price) !!}<br>
                         {{ $plan->ram }} MB<br>
                         {{ $plan->cpu }}%<br>
                         {{ $plan->disk }} MB<br>
                         {{ $plan->databases }}<br>
                         {{ $plan->backups }}<br>
-                        {{ $plan->allocations - 1 }}
+                        {{ $plan->extra_ports }}
                     </p>
                 </div>
             </div>
@@ -81,17 +96,15 @@
                         <b>Recurring Amount</b><br>
                         <b>Billing Cycle</b><br>
                         <b>Server Creation Date</b><br>
-                        <b>Due Date</b><br>
-                        <b>Payment Method</b><br>
-                        <b>Backup Payment Method</b>
+                        <b>Next Due Date</b><br>
+                        <b>Payment Method</b>
                     </p>
                     <p class="card-text col-5">
-                        {!! session('currency')->symbol !!}{{ number_format($plan->price * session('currency')->rate, 2) }} {{ session('currency')->name }}<br>
-                        {{ ucfirst($server->billing_cycle) }}<br>
+                        {!! price($plan_cycle->renew_price) !!}<br>
+                        {{ $plan_cycle->type_name($plan_cycle->cycle_length, $plan_cycle->cycle_type) }}<br>
                         {{ $server->created_at }}<br>
-                        {{ $server->next_due }}<br>
-                        {{ $server->payment_method }}<br>
-                        Account Credit
+                        {{ $server->due_date }}<br>
+                        {{ $server->payment_method }}
                     </p>
                 </div>
             </div>
@@ -103,20 +116,23 @@
                     <table class="table table-hover text-nowrap">
                         <thead>
                             <tr>
-                                <th style="width:10%">ID</th>
-                                <th style="width:55%">Name</th>
-                                <th style="width:35%">Price</th>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Quantity</th>
+                                <th>Renew Price</th>
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach (json_decode($server->addon, true) as $addon_id)
+                            @foreach ($server_addon_model->where('server_id', $id)->get() as $server_addon)
                                 @php
-                                    $addon = $addon_model->find($addon_id);
+                                    $addon = $addon_model->find($server_addon->addon_id);
+                                    $addon_cycle = $addon_cycle_model->find($server_addon->cycle_id);
                                 @endphp
                                 <tr>
                                     <td><a href="{{ route('admin.addon.show', ['id' => $addon->id]) }}" target="_blank"></a>{{ $addon->id }}</td>
                                     <td>{{ $addon->name }}</td>
-                                    <td>{!! session('currency')->symbol !!}{{ number_format($addon->price * session('currency')->rate, 2) }} {{ session('currency')->name }}</td>
+                                    <td>{{ $server_addon->value }}</td>
+                                    <td>{!! price($addon_cycle->renew_price) !!}</td>
                                 </tr>
                             @endforeach
                         </tbody>
@@ -125,4 +141,33 @@
             </div>
         </div>
     </div>
+@endsection
+
+@section('admin_scripts')
+    <script>
+        function suspendForm(data) {
+            if (data.success) {
+                toastr.info(data.success)
+            } else if (data.error) {
+                toastr.error(data.error)
+            } else if (data.errors) {
+                data.errors.forEach(error => { toastr.error(error) });
+            } else {
+                wentWrong()
+            }
+        }
+        
+        function deleteForm(data) {
+            if (data.success) {
+                toastr.info(data.success)
+                waitRedirect('{{ route('admin.servers.active') }}')
+            } else if (data.error) {
+                toastr.error(data.error)
+            } else if (data.errors) {
+                data.errors.forEach(error => { toastr.error(error) });
+            } else {
+                wentWrong()
+            }
+        }
+    </script>
 @endsection

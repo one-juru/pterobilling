@@ -132,17 +132,29 @@ class PlanController extends ApiController
         $plan->order = $request->input('order');
         $plan->save();
 
-        $delete_failed = false;
-
-        foreach (PlanCycle::where('plan_id', $id)->get() as $cycle) {
-            if (Server::where('plan_cycle', $cycle->id)->doesntExist()) {
-                $cycle->delete();
-            } else {
-                $delete_failed = true;
-            }
-        }
-
+        $plan_cycles = PlanCycle::where('plan_id', $id)->get();
+        $update_failed = $delete_failed = false;
         foreach ($request->input('cycle') as $cycle) {
+            foreach ($plan_cycles as $plan_cycle) {
+                if ($cycle['cycle_length'] == $plan_cycle->cycle_length && $cycle['cycle_type'] == $plan_cycle->cycle_type) {
+                    $plan_cycle->init_price = $cycle['init_price'];
+                    $plan_cycle->renew_price = $cycle['renew_price'];
+                    $plan_cycle->setup_fee = $cycle['setup_fee'];
+                    $plan_cycle->late_fee = $cycle['late_fee'];
+                    $plan_cycle->trial_length = $cycle['trial_length'];
+                    $plan_cycle->trial_type = $cycle['trial_type'];
+
+                    if ($plan_cycle->isDirty())
+                        if (Server::where('plan_cycle', $plan_cycle->id)->doesntExist()) {
+                            $plan_cycle->save();
+                        } else {
+                            $update_failed = true;
+                        }
+                    
+                    continue 2;
+                }
+            }
+            
             PlanCycle::create([
                 'plan_id' => $plan->id,
                 'cycle_length' => $cycle['cycle_length'],
@@ -156,7 +168,20 @@ class PlanController extends ApiController
             ]);
         }
 
-        return $this->respondJson(['success' => 'You have updated the server plan successfully!', 'delete_failed' => $delete_failed]);
+        foreach ($plan_cycles as $plan_cycle) {
+            foreach ($request->input('cycle') as $cycle)
+                if ($cycle['cycle_length'] == $plan_cycle->cycle_length && $cycle['cycle_type'] == $plan_cycle->cycle_type) {
+                    continue 2;
+                }
+                
+            if (Server::where('plan_cycle', $plan_cycle->id)->doesntExist()) {
+                $plan_cycle->delete();
+            } else {
+                $delete_failed = true;
+            }
+        }
+
+        return $this->respondJson(['success' => 'You have updated the server plan successfully!', 'update_failed' => $update_failed, 'delete_failed' => $delete_failed]);
     }
     
     public function delete($id)

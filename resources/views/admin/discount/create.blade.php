@@ -34,8 +34,8 @@
                         </div>
                     </div>
                     <div class="card-footer row justify-content-center">
-                        <a href="{{ route('admin.discount.index') }}" class="btn btn-default btn-sm col-lg-1 col-md-3">Cancel</a>
-                        <button type="submit" class="btn btn-success btn-sm col-lg-1 col-md-3 offset-lg-1 offset-md-2">Create</button>
+                        <a href="{{ route('admin.discount.index') }}" class="btn btn-default btn-sm col-lg-2 col-3">Cancel</a>
+                        <button type="submit" class="btn btn-success btn-sm col-lg-2 col-3 offset-lg-1 offset-2">Create</button>
                     </div>
                 </form>
             </div>

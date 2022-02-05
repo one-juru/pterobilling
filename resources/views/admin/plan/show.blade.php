@@ -181,19 +181,19 @@
                         </div>
                         <div class="form-group col-lg-3">
                             <label>Initial Price</label>
-                            <input type="text" name="cycle[0][init_price]" value="{{ $plan_cycles[0]->init_price }}" class="form-control" placeholder="Use default currency" required>
+                            <input type="text" name="cycle[0][init_price]" value="{{ price($plan_cycles[0]->init_price, 0) }}" class="form-control" placeholder="Use default currency" required>
                         </div>
                         <div class="form-group col-lg-3">
                             <label>Renewal Price</label>
-                            <input type="text" name="cycle[0][renew_price]" value="{{ $plan_cycles[0]->renew_price }}" class="form-control" placeholder="Use default currency" required>
+                            <input type="text" name="cycle[0][renew_price]" value="{{ price($plan_cycles[0]->renew_price, 0) }}" class="form-control" placeholder="Use default currency" required>
                         </div>
                         <div class="form-group col-lg-3">
                             <label>Setup fee</label>
-                            <input type="text" name="cycle[0][setup_fee]" value="{{ $plan_cycles[0]->setup_fee }}" class="form-control" placeholder="Use default currency" required>
+                            <input type="text" name="cycle[0][setup_fee]" value="{{ price($plan_cycles[0]->setup_fee, 0) }}" class="form-control" placeholder="Use default currency" required>
                         </div>
                         <div class="form-group col-lg-3">
                             <label>Late fee</label>
-                            <input type="text" name="cycle[0][late_fee]" value="{{ $plan_cycles[0]->late_fee }}" class="form-control" placeholder="Use default currency" required>
+                            <input type="text" name="cycle[0][late_fee]" value="{{ price($plan_cycles[0]->late_fee, 0) }}" class="form-control" placeholder="Use default currency" required>
                         </div>
                         <div class="form-group col-lg-3">
                             <label>Trial Length (Optional)</label>
@@ -237,19 +237,19 @@
                                 </div>
                                 <div class="form-group col-lg-3">
                                     <label>Initial Price</label>
-                                    <input type="text" name="cycle[{{$i}}][init_price]" value="{{ $plan_cycle->init_price }}" class="form-control" placeholder="Use default currency">
+                                    <input type="text" name="cycle[{{$i}}][init_price]" value="{{ price($plan_cycle->init_price, 0) }}" class="form-control" placeholder="Use default currency">
                                 </div>
                                 <div class="form-group col-lg-3">
                                     <label>Renewal Price</label>
-                                    <input type="text" name="cycle[{{$i}}][renew_price]" value="{{ $plan_cycle->renew_price }}" class="form-control" placeholder="Use default currency">
+                                    <input type="text" name="cycle[{{$i}}][renew_price]" value="{{ price($plan_cycle->renew_price, 0) }}" class="form-control" placeholder="Use default currency">
                                 </div>
                                 <div class="form-group col-lg-3">
                                     <label>Setup fee</label>
-                                    <input type="text" name="cycle[{{$i}}][setup_fee]" value="{{ $plan_cycle->setup_fee }}" class="form-control" placeholder="Use default currency">
+                                    <input type="text" name="cycle[{{$i}}][setup_fee]" value="{{ price($plan_cycle->setup_fee, 0) }}" class="form-control" placeholder="Use default currency">
                                 </div>
                                 <div class="form-group col-lg-3">
                                     <label>Late fee</label>
-                                    <input type="text" name="cycle[{{$i}}][late_fee]" value="{{ $plan_cycle->late_fee }}" class="form-control" placeholder="Use default currency">
+                                    <input type="text" name="cycle[{{$i}}][late_fee]" value="{{ price($plan_cycle->late_fee, 0) }}" class="form-control" placeholder="Use default currency">
                                 </div>
                                 <div class="form-group col-lg-3">
                                     <label>Trial Length (Optional)</label>
@@ -278,8 +278,8 @@
                 </form>
                 <form action="{{ route('api.admin.plan.delete', ['id' => $id]) }}" method="DELETE" data-callback="deleteForm" id="deleteForm"></form>
                 <div class="card-footer col-lg-12 row justify-content-center">
-                    <button type="submit" form="updateForm" class="btn btn-success btn-sm col-lg-2 col-md-4">Save</button>
-                    <button type="submit" form="deleteForm" class="btn btn-danger btn-sm col-lg-2 col-md-4 offset-lg-1 offset-md-2 ">Delete</button>
+                    <button type="submit" form="updateForm" class="btn btn-success btn-sm col-lg-2 col-3">Save</button>
+                    <button type="submit" form="deleteForm" class="btn btn-danger btn-sm col-lg-2 col-3 offset-lg-1 offset-2">Delete</button>
                 </div>
             </div>
         </div>
@@ -292,8 +292,12 @@
             if (data.success) {
                 toastr.success(data.success)
 
+                if (data.update_failed) {
+                    toastr.warning('Skipped updating the billing cycle(s) that are in use!')
+                }
+
                 if (data.delete_failed) {
-                    toastr.warning('Some billing cycles cannot be modified/deleted because some servers are still using it!')
+                    toastr.warning('Skipped deleting the billing cycle(s) that are in use!')
                 }
             } else if (data.error) {
                 toastr.error(data.error)

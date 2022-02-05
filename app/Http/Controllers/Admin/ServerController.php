@@ -29,6 +29,6 @@ class ServerController extends Controller
 
     public function show($id)
     {
-        return view('admin.server.show', ['id' => $id]);
+        return view('admin.server.show', ['id' => $id, 'server' => Server::find($id)]);
     }
 }

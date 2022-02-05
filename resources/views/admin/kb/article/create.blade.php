@@ -32,8 +32,8 @@
                         </div>
                     </div>
                     <div class="card-footer row justify-content-center">
-                        <a href="{{ route('admin.kb.show', ['category_id' => $category_id]) }}" class="btn btn-default btn-sm col-lg-1 col-md-3">Cancel</a>
-                        <button type="submit" class="btn btn-success btn-sm col-lg-2 col-md-4 offset-lg-1 offset-md-2 ">Save</button>
+                        <a href="{{ route('admin.kb.show', ['category_id' => $category_id]) }}" class="btn btn-default btn-sm col-lg-2 col-3">Cancel</a>
+                        <button type="submit" class="btn btn-success btn-sm col-lg-2 col-3 offset-lg-1 offset-2">Save</button>
                     </div>
                 </div>
             </div>

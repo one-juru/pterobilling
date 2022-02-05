@@ -87,18 +87,27 @@ class AddonController extends ApiController
         $addon->per_server_limit = $request->input('per_server_limit');
         $addon->order = $request->input('order');
         $addon->save();
-
-        $delete_failed = false;
         
-        foreach (AddonCycle::where('addon_id', $id)->get() as $cycle) {
-            if (ServerAddon::where('addon_id', $id)->doesntExist()) {
-                $cycle->delete();
-            } else {
-                $delete_failed = true;
-            }
-        }
+        $addon_cycles = AddonCycle::where('addon_id', $id)->get();
+        $update_failed = $delete_failed = false;
+        foreach ($request->input('cycle') as $cycle) {
+            foreach ($addon_cycles as $addon_cycle) {
+                if ($cycle['cycle_length'] == $addon_cycle->cycle_length && $cycle['cycle_type'] == $addon_cycle->cycle_type) {
+                    $addon_cycle->init_price = $cycle['init_price'];
+                    $addon_cycle->renew_price = $cycle['renew_price'];
+                    $addon_cycle->setup_fee = $cycle['setup_fee'];
 
-        foreach ($request->input('cycle') as $cycle)
+                    if ($addon_cycle->isDirty())
+                        if (ServerAddon::where('cycle_id', $addon_cycle->id)->doesntExist()) {
+                            $addon_cycle->save();
+                        } else {
+                            $update_failed = true;
+                        }
+                    
+                    continue 2;
+                }
+            }
+            
             AddonCycle::create([
                 'addon_id' => $addon->id,
                 'cycle_length' => $cycle['cycle_length'],
@@ -107,8 +116,22 @@ class AddonController extends ApiController
                 'renew_price' => $cycle['renew_price'],
                 'setup_fee' => $cycle['setup_fee'],
             ]);
-        
-        return $this->respondJson(['success' => 'You have updated the plan add-on successfully!', 'delete_failed' => $delete_failed]);
+        }
+
+        foreach ($addon_cycles as $addon_cycle) {
+            foreach ($request->input('cycle') as $cycle)
+                if ($cycle['cycle_length'] == $addon_cycle->cycle_length && $cycle['cycle_type'] == $addon_cycle->cycle_type) {
+                    continue 2;
+                }
+                
+            if (ServerAddon::where('cycle_id', $addon_cycle->id)->doesntExist()) {
+                $addon_cycle->delete();
+            } else {
+                $delete_failed = true;
+            }
+        }
+
+        return $this->respondJson(['success' => 'You have updated the plan add-on successfully!', 'update_failed' => $update_failed, 'delete_failed' => $delete_failed]);
     }
     
     public function delete($id)

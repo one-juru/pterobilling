@@ -34,23 +34,11 @@
                                     <td>
                                         @if ($invoice->server_id)
                                             Server #{{ $invoice->server_id }}
-                                        @elseif ($invoice->credit_amount)
-                                            {!! session('currency')->symbol !!}{{ $invoice->credit_amount * session('currency')->rate }} {{ session('currency')->name }} Credit
+                                        @elseif ($invoice->credit)
+                                            {!! price($invoice->credit) !!} Credit
                                         @endif
                                     </td>
-                                    @php
-                                        if (is_null($tax = $tax_model->find($invoice->tax_id))) {
-                                            $tax = session('tax');
-                                        }
-                                    @endphp
-                                    <td>
-                                        @if ($invoice->server_id)
-                                            {!! session('currency')->symbol !!}{{ ($server_model->getTotalCost($server_model->find($invoice->server_id)) + $invoice->late_fee) }} 
-                                        @elseif ($invoice->credit_amount)
-                                            {!! session('currency')->symbol !!}{{ $tax_model::getAfterTax($invoice->credit_amount, $invoice->tax_id) * session('currency')->rate }} 
-                                        @endif
-                                        {{ session('currency')->name }}
-                                    </td>
+                                    <td>{!! price($invoice->total) !!}</td>
                                     <td>{{ $invoice->created_at }}</td>
                                     <td>{{ $invoice->due_date }}</td>
                                 </tr>
@@ -84,23 +72,11 @@
                                     <td>
                                         @if ($invoice->server_id)
                                             Server #{{ $invoice->server_id }}
-                                        @elseif ($invoice->credit_amount)
-                                            {!! session('currency')->symbol !!}{{ $invoice->credit_amount * session('currency')->rate }} {{ session('currency')->name }} Credit
+                                        @elseif ($invoice->credit)
+                                            {!! price($invoice->credit) !!} Credit
                                         @endif
                                     </td>
-                                    @php
-                                        if (is_null($tax = $tax_model->find($invoice->tax_id))) {
-                                            $tax = session('tax');
-                                        }
-                                    @endphp
-                                    <td>
-                                        @if ($invoice->server_id)
-                                            {!! session('currency')->symbol !!}{{ $tax_model::getAfterTax($server_model->getTotalCost() + $invoice->late_fee, $invoice->tax_id) * session('currency')->rate }} 
-                                        @elseif ($invoice->credit_amount)
-                                            {!! session('currency')->symbol !!}{{ $tax_model::getAfterTax($invoice->credit_amount, $invoice->tax_id) * session('currency')->rate }} 
-                                        @endif
-                                        {{ session('currency')->name }}
-                                    </td>
+                                    <td>{!! price($invoice->total) !!}</td>
                                     <td>{{ $invoice->created_at }}</td>
                                     <td>{{ $invoice->updated_at }}</td>
                                 </tr>
